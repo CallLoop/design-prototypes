@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call Loop — Buy number prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue1:#1364F9;--blue2:#1854EA;--blue3:#1885EA;--blue4:#1362AC;--blue6:#D0E0FE;
+  --black:#14161A;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;--ok:#05944F;--warn2:#BA7D04;--notify2:#E6F7FF;
+  --shadow1:0 0 2px rgba(83,102,137,.2),0 12px 16px rgba(83,102,137,.08),0 10px 40px rgba(83,102,137,.08);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--black);background:var(--g4);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button:focus-visible{outline:2px solid var(--blue1);outline-offset:2px}
+
+.shell{position:fixed;inset:0;display:flex}
+.shell .a{width:240px;background:#fff;box-shadow:inset -1px 0 0 var(--g3)}
+.shell .b{width:220px;background:#fff;box-shadow:inset -1px 0 0 var(--g3)}
+.shell .c{flex:1;padding:48px;display:flex;flex-direction:column;gap:16px}
+.shell .c i{display:block;border-radius:8px;background:var(--g3)}
+@media (max-width:900px){.shell .a,.shell .b{display:none}}
+
+.overlay{position:fixed;inset:0;background:rgba(20,22,26,.2);display:flex;justify-content:center;align-items:flex-start;padding:40px 16px;overflow-y:auto}
+.dialog{width:820px;max-width:100%;padding:32px;background:#fff;border-radius:20px;box-shadow:var(--shadow1);display:flex;flex-direction:column;gap:20px}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+.top .kick{display:block;margin-bottom:12px;font-size:13px;line-height:16px;color:var(--g1)}
+.top h2{margin:0;font-size:20px;line-height:24px;letter-spacing:-.4px;font-weight:600}
+.x{width:24px;height:24px;padding:0;border:0;background:transparent;color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.x:hover{color:var(--black)}
+.step{display:flex;flex-direction:column;gap:8px;margin-top:-12px}
+.step span{align-self:flex-end;font-size:12px;line-height:16px;color:var(--g1)}
+.bar{height:4px;border-radius:2px;background:var(--g3);overflow:hidden}.bar i{display:block;width:50%;height:100%;background:var(--blue3);border-radius:2px}
+.tabs{display:flex;gap:8px;box-shadow:inset 0 -1px 0 var(--g3);overflow-x:auto}
+.tab{padding:0 8px 10px;border:0;background:transparent;font-size:14px;line-height:16px;color:var(--g1);cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--blue3)}
+.tab[aria-selected="true"]{color:var(--blue1);font-weight:500;box-shadow:inset 0 -2px 0 var(--blue1)}
+.alert{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;background:var(--notify2);font-size:14px;line-height:20px;font-weight:500;color:var(--blue4)}
+.alert i{flex:none;width:24px;height:24px;border-radius:50%;background:var(--blue3);display:inline-flex;align-items:center;justify-content:center}
+.tools{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.search{flex:1;min-width:220px;position:relative}
+.search svg{position:absolute;left:12px;top:12px}
+.search input{width:100%;height:40px;padding:8px 12px 8px 36px;border:0;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);font-size:14px;outline:none}
+.search input:focus{box-shadow:inset 0 0 0 1px var(--blue1),0 0 0 3px var(--blue6)}
+.sw{flex:none;height:40px;padding:0 4px;display:inline-flex;align-items:center;gap:10px;border:0;border-radius:8px;background:transparent;font-size:14px;line-height:16px;cursor:pointer}
+.track{width:32px;height:20px;border-radius:12px;background:var(--g3);position:relative;display:inline-block;transition:background .2s}
+.track i{position:absolute;top:4px;left:4px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s}
+.sw[aria-checked="true"] .track{background:var(--blue1)}
+.sw[aria-checked="true"] .track i{left:16px}
+.scroll{height:336px;overflow:auto;border-radius:8px}
+.scroll::-webkit-scrollbar{width:8px;height:8px}.scroll::-webkit-scrollbar-thumb{background:var(--g3);border-radius:4px}
+table{width:100%;min-width:640px;border-collapse:separate;border-spacing:0;font-size:14px;line-height:16px}
+th{position:sticky;top:0;z-index:2;height:40px;padding:0 8px;background:var(--g4);color:var(--g1);font-weight:400;font-size:12px;text-align:left;white-space:nowrap}
+th:first-child{width:48px;padding-left:16px;border-radius:8px 0 0 8px}
+th:last-child{width:80px;padding-right:16px;text-align:right;border-radius:0 8px 8px 0}
+td{height:44px;padding:0 8px;border-bottom:1px solid var(--g3);white-space:nowrap}
+td:first-child{padding-left:16px}
+td:last-child{padding-right:16px;text-align:right}
+tbody tr:not(.added):hover td{background:var(--g4)}
+tr.added td{color:var(--g2)}
+tr.added .st{opacity:.5}
+input[type="checkbox"]{width:18px;height:18px;margin:0;accent-color:var(--blue1);cursor:pointer;vertical-align:middle}
+.sortb{padding:0;border:0;background:transparent;display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:16px;color:var(--g1);cursor:pointer}
+.sortb:hover{color:var(--black)}
+th[aria-sort="ascending"] .sortb,th[aria-sort="descending"] .sortb{color:var(--black);font-weight:500}
+.sortb .u,.sortb .d{stroke:var(--g2)}
+th[aria-sort="ascending"] .u,th[aria-sort="descending"] .d{stroke:var(--blue1)}
+.tag{position:relative;margin-left:8px;padding:2px 8px;border-radius:6px;background:var(--g4);color:var(--g1);font-size:12px;line-height:16px;cursor:help;outline:none}
+.tag .tb{display:none;position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);z-index:3;padding:6px 8px;border-radius:8px;background:rgba(20,22,26,.9);color:#fff;white-space:nowrap}
+.tag:hover .tb,.tag:focus .tb{display:block}
+.st{display:inline-flex;align-items:center;gap:6px}
+.st.v{color:var(--ok)}.st.u{color:var(--warn2)}
+.date{color:var(--g1)}
+.none{margin:24px 0;text-align:center;font-size:14px;color:var(--g1)}
+.sum{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;line-height:16px;color:var(--g1)}
+.sum b{color:var(--black);font-weight:500}
+.placeholder{height:470px;border-radius:12px;border:1px dashed var(--g2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--g1);text-align:center;padding:16px}
+.actions{display:flex;gap:12px}
+.btn{height:40px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;border:0;border-radius:8px;font-size:14px;line-height:16px;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--blue1);color:#fff}.btn.primary:hover{background:var(--blue2)}
+.btn.primary:disabled{background:rgba(19,100,249,.4);cursor:not-allowed}
+.btn.secondary{background:rgba(183,191,200,.3)}.btn.secondary:hover{background:var(--g3)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;padding:10px 14px;border-radius:10px;background:rgba(20,22,26,.92);color:#fff;font-size:14px;line-height:20px;white-space:nowrap}
+@media (max-width:600px){.dialog{padding:20px}.overlay{padding:16px 8px}}
+</style>
+</head>
+<body>
+<div class="shell" aria-hidden="true"><div class="a"></div><div class="b"></div><div class="c"><i style="width:220px;height:40px"></i><i style="height:40px"></i><i style="height:300px;border-radius:12px;background:#fff"></i></div></div>
+<div id="root"></div>
+<script>
+(function () {
+  'use strict';
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const AREAS = ['205', '907', '480', '520', '205', '205', '205', '312', '415', '646', '702', '713', '786', '818', '206', '303', '404', '503', '512', '617', '619', '720', '801', '919'];
+  const NUMS = AREAS.map((a, i) => {
+    const mid = String(100 + ((i * 137) % 900)).padStart(3, '0');
+    const end = String(1000 + ((i * 2741) % 9000)).slice(-4);
+    const d = new Date(2026, 9, 14 - i * 3, 9 + (i * 5) % 9, (i * 17) % 60);
+    const h = d.getHours();
+    const time = ((h + 11) % 12 + 1) + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM');
+    return {
+      id: 'n' + i,
+      number: i === 0 ? '(205) 548-1655' : i === 4 ? '(205) 555-0101' : i === 5 ? '(205) 555-0102' : i === 6 ? '(205) 555-0103' : '(' + a + ') ' + mid + '-' + end,
+      added: i < 4,
+      verified: !(i === 3 || i === 6 || i % 7 === 5),
+      ts: d.getTime(),
+      purchased: MS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' · ' + time
+    };
+  });
+  const TABS = [['local', 'Local number'], ['tollfree', 'Toll-Free number'], ['external', 'Manage external number']];
+  const norm = (t) => t.replace(/\D/g, '');
+
+  const S = { tab: 'external', hideAdded: false, q: '', sel: [], sortKey: 'date', sortDir: 'desc', toast: '' };
+  let toastTimer = null;
+
+  const IC = {
+    x: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    info: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 7.5v4M8 4.6v.1"/></svg>',
+    search: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#757D8A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>',
+    sort: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="u" d="M5 6.5L8 3.5l3 3"/><path class="d" d="M5 9.5l3 3 3-3"/></svg>',
+    ok: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#05944F"/><path d="M4.8 8.2l2.1 2.1 4.3-4.4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    warn: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#BA7D04"/><path d="M8 4.6v4.2M8 11.2v.1" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    refresh: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 2.5v3h-3"/></svg>'
+  };
+
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    S.toast = msg;
+    toastTimer = setTimeout(() => { S.toast = ''; render(); }, 2800);
+  }
+
+  function visibleRows() {
+    const q = norm(S.q);
+    const mul = S.sortDir === 'asc' ? 1 : -1;
+    return NUMS.filter((n) => (!S.hideAdded || !n.added) && (!q || norm(n.number).includes(q)))
+      .sort((a, b) => mul * (S.sortKey === 'number' ? norm(a.number).localeCompare(norm(b.number)) : a.ts - b.ts));
+  }
+
+  function tableView() {
+    const rows = visibleRows();
+    const selectable = rows.filter((n) => !n.added);
+    const all = selectable.length > 0 && selectable.every((n) => S.sel.includes(n.id));
+    const ariaSort = (k) => S.sortKey === k ? (S.sortDir === 'asc' ? 'ascending' : 'descending') : 'none';
+    const added = NUMS.filter((n) => n.added).length;
+    const avail = NUMS.length - added;
+    const count = S.sel.length;
+    return '<div class="alert"><i>' + IC.info + '</i>Select the numbers you want to use in Call Loop</div>' +
+      '<div class="tools"><div class="search">' + IC.search + '<input id="q" type="search" aria-label="Search numbers" placeholder="Search..." value="' + esc(S.q) + '"></div>' +
+      '<button type="button" class="sw" role="switch" aria-checked="' + S.hideAdded + '" data-act="toggleHide"><span class="track" aria-hidden="true"><i></i></span>Hide added numbers <span style="color:#757D8A">(' + added + ')</span></button></div>' +
+      '<div class="scroll"><table><thead><tr>' +
+      '<th scope="col"><input type="checkbox" data-act="all" aria-label="Select all available numbers"' + (all ? ' checked' : '') + (selectable.length ? '' : ' disabled') + '></th>' +
+      '<th scope="col" aria-sort="' + ariaSort('number') + '"><button type="button" class="sortb" data-act="sort" data-k="number">Phone number' + IC.sort + '</button></th>' +
+      '<th scope="col" style="width:140px">Status</th>' +
+      '<th scope="col" style="width:200px" aria-sort="' + ariaSort('date') + '"><button type="button" class="sortb" data-act="sort" data-k="date">Purchased' + IC.sort + '</button></th>' +
+      '<th scope="col">Price</th></tr></thead><tbody>' +
+      rows.map((n) => '<tr' + (n.added ? ' class="added"' : '') + '><td>' +
+        (n.added ? '' : '<input type="checkbox" data-act="pick" data-id="' + n.id + '" aria-label="Select ' + n.number + '"' + (S.sel.includes(n.id) ? ' checked' : '') + '>') +
+        '</td><td>' + n.number + (n.added ? '<span class="tag" tabindex="0">Added<span class="tb" role="tooltip">Already in Call Loop</span></span>' : '') + '</td>' +
+        '<td><span class="st ' + (n.verified ? 'v' : 'u') + '">' + (n.verified ? IC.ok + 'Verified' : IC.warn + 'Unverified') + '</span></td>' +
+        '<td' + (n.added ? '' : ' class="date"') + '>' + n.purchased + '</td><td>$5.00</td></tr>').join('') +
+      '</tbody></table>' + (rows.length ? '' : '<p class="none">No numbers match “' + esc(S.q) + '”.</p>') + '</div>' +
+      '<div class="sum"><span>' + avail + ' available · ' + added + (S.hideAdded ? ' added hidden' : ' already added') + '</span>' +
+      (count ? '<b>' + count + ' selected · $' + (count * 5).toFixed(2) + ' / month</b>' : '') + '</div>';
+  }
+
+  const root = document.getElementById('root');
+  function render() {
+    const active = document.activeElement;
+    const keepId = active && active.id ? active.id : null;
+    const pos = keepId === 'q' ? active.selectionStart : null;
+    const count = S.sel.length;
+    const ext = S.tab === 'external';
+    const scrollEl = root.querySelector('.scroll');
+    const scrollTop = scrollEl ? scrollEl.scrollTop : 0;
+    root.innerHTML = '<div class="overlay"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="t">' +
+      '<div class="top"><div><span class="kick">Buy number</span><h2 id="t">Choose number</h2></div><button type="button" class="x" data-act="close" aria-label="Close">' + IC.x + '</button></div>' +
+      '<div class="step"><span>Step 1 / 2</span><div class="bar" role="progressbar" aria-label="Step 1 of 2" aria-valuenow="1" aria-valuemin="0" aria-valuemax="2"><i></i></div></div>' +
+      '<div class="tabs" role="tablist" aria-label="Number type">' + TABS.map(([id, label]) => '<button type="button" class="tab" role="tab" data-act="tab" data-v="' + id + '" aria-selected="' + (S.tab === id) + '">' + label + '</button>').join('') + '</div>' +
+      (ext ? tableView() : '<div class="placeholder">' + (S.tab === 'local' ? 'Local number' : 'Toll-Free number') + ' search isn’t part of this prototype.</div>') +
+      '<div class="actions"><button type="button" class="btn primary" data-act="continue"' + (count ? '' : ' disabled') + '>' + (count ? 'Continue (' + count + ')' : 'Continue') + '</button>' +
+      '<button type="button" class="btn secondary" data-act="refresh">' + IC.refresh + 'Refresh</button></div>' +
+      '</div></div>' + (S.toast ? '<div class="toast" role="status">' + esc(S.toast) + '</div>' : '');
+    const newScroll = root.querySelector('.scroll');
+    if (newScroll) newScroll.scrollTop = scrollTop;
+    if (keepId) {
+      const el = document.getElementById(keepId) || root.querySelector('[data-act="' + (active.dataset && active.dataset.act) + '"]');
+      if (el) { el.focus(); if (pos != null && el.setSelectionRange) el.setSelectionRange(pos, pos); }
+    } else if (active && active.dataset && active.dataset.act) {
+      const sel = '[data-act="' + active.dataset.act + '"]' + (active.dataset.k ? '[data-k="' + active.dataset.k + '"]' : '') + (active.dataset.v ? '[data-v="' + active.dataset.v + '"]' : '') + (active.dataset.id ? '[data-id="' + active.dataset.id + '"]' : '');
+      const el = root.querySelector(sel);
+      if (el) el.focus();
+    }
+  }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t) return;
+    const act = t.dataset.act;
+    if (act === 'pick' || act === 'all') return; // handled on change
+    if (act === 'toggleHide') S.hideAdded = !S.hideAdded;
+    else if (act === 'tab') S.tab = t.dataset.v;
+    else if (act === 'sort') {
+      const k = t.dataset.k;
+      S.sortDir = S.sortKey === k ? (S.sortDir === 'asc' ? 'desc' : 'asc') : (k === 'date' ? 'desc' : 'asc');
+      S.sortKey = k;
+    } else if (act === 'refresh') { S.q = ''; showToast('Numbers refreshed'); }
+    else if (act === 'continue') showToast('Step 2 isn’t part of this prototype');
+    else if (act === 'close') showToast('Close isn’t part of this prototype');
+    render();
+  });
+
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (!t.dataset) return;
+    if (t.dataset.act === 'pick') {
+      const id = t.dataset.id;
+      S.sel = S.sel.includes(id) ? S.sel.filter((x) => x !== id) : S.sel.concat(id);
+      render();
+    } else if (t.dataset.act === 'all') {
+      const ids = visibleRows().filter((n) => !n.added).map((n) => n.id);
+      const all = ids.every((id) => S.sel.includes(id));
+      S.sel = all ? S.sel.filter((x) => !ids.includes(x)) : Array.from(new Set(S.sel.concat(ids)));
+      render();
+    }
+  });
+
+  document.addEventListener('input', (e) => {
+    if (e.target.id === 'q') { S.q = e.target.value; render(); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

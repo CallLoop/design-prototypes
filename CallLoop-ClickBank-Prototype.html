@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call Loop — ClickBank integration prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue1:#1364F9;--blue2:#1854EA;--blue3:#1885EA;--blue4:#1362AC;--blue5:#E7EFFE;--blue6:#D0E0FE;
+  --black:#14161A;--text:#2C2D2E;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;
+  --aqua2:#E4F4FF;--ok:#05944F;--ok2:#026233;--ok3:#E7F6ED;--err:#E11900;--err2:#A11200;--err3:#FFF1F0;
+  --purple1:#7A16F5;--purple3:#F0E4FF;--notify2:#E6F7FF;
+  --shadow1:0 0 2px rgba(83,102,137,.2),0 12px 16px rgba(83,102,137,.08),0 10px 40px rgba(83,102,137,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--black);background:#fff;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--blue1)}a:hover{color:var(--blue2)}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--blue1);outline-offset:1px}
+.app{display:flex;flex-wrap:wrap;min-height:100vh}
+
+/* Sidebar */
+.side{width:240px;flex:none;height:100vh;position:sticky;top:0;overflow:auto;padding:16px 12px;box-shadow:inset -1px 0 0 var(--g3);display:flex;flex-direction:column;justify-content:space-between;gap:24px;background:#fff}
+.shead{height:44px;padding:0 8px 0 12px;border-radius:12px;background:var(--g4);display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600}
+.sclose{width:28px;height:28px;padding:0;border:0;border-radius:8px;background:var(--blue1);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.divider{height:1px;background:var(--g3);margin:8px 4px}
+.nav{height:36px;padding:0 12px;display:flex;align-items:center;gap:12px;border-radius:8px;color:var(--black);text-decoration:none;font-size:14px;line-height:16px}
+.nav:hover{background:var(--g4);color:var(--black)}
+.nav svg{stroke:var(--text);flex:none}
+.nav.on{background:var(--aqua2);font-weight:500}.nav.on svg{stroke:var(--blue1)}
+.plan{margin-top:12px;padding:12px;border-radius:12px;background:var(--g4);display:flex;flex-direction:column;gap:10px}
+.plan .row{display:flex;justify-content:space-between;align-items:center;font-size:11px;line-height:14px}
+.plan a{text-decoration:none;font-weight:600}
+.prog{height:6px;border-radius:3px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);overflow:hidden}.prog i{display:block;height:100%;width:79%;background:var(--blue3);border-radius:3px}
+
+/* Main */
+.main{flex:999 1 560px;min-width:0;padding:40px 48px 96px}
+.wrap{max-width:1120px;display:flex;flex-direction:column;gap:32px}
+h1{margin:0;font-size:40px;line-height:48px;letter-spacing:-.8px;font-weight:600}
+.h2{margin:0;font-size:17px;line-height:24px;font-weight:600}
+.muted{color:var(--g1)}
+.btn{height:40px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;font-size:14px;line-height:16px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn.sm{height:36px}
+.btn.primary{background:var(--blue1);color:#fff}.btn.primary:hover{background:var(--blue2)}
+.btn.primary:disabled{background:rgba(19,100,249,.4);cursor:not-allowed}
+.btn.secondary{background:rgba(183,191,200,.3);color:var(--black)}.btn.secondary:hover{background:var(--g3)}
+.btn.blue{background:var(--blue5);color:var(--blue1)}.btn.blue:hover{background:var(--blue6)}
+.btn.danger{background:var(--err);color:#fff}.btn.danger:hover{background:var(--err2)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:12px}
+.search input{width:240px;height:40px;padding:8px 12px 8px 36px;border:0;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);font-size:14px;outline:none}
+input:focus,select:focus{box-shadow:inset 0 0 0 1px var(--blue1),0 0 0 3px var(--blue6)!important;outline:none}
+
+/* Cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.card{position:relative;min-height:224px;padding:12px 16px 16px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);display:flex;flex-direction:column;align-items:center;gap:12px}
+.card:hover{box-shadow:inset 0 0 0 1px var(--g2)}
+.ctop{align-self:stretch;height:28px;display:flex;justify-content:space-between;align-items:center}
+.native{padding:2px 8px;border-radius:6px;background:var(--purple3);color:var(--purple1);font-size:12px;line-height:16px}
+.more{width:28px;height:28px;padding:0;border:0;border-radius:8px;background:var(--g4);color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.more:hover{background:var(--g3);color:var(--black)}
+.logo{width:72px;height:72px;border-radius:22px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;justify-content:center;font-size:20px;line-height:24px;font-weight:600;letter-spacing:-.4px}
+.cname{font-size:15px;line-height:20px;text-align:center}
+.cact{margin-top:auto;align-self:stretch;display:flex;gap:12px}
+.cact .btn{height:36px}
+.cact .grow{flex:1}
+.pill{flex:1;min-width:0;height:36px;padding:0 12px;border:0;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;line-height:16px}
+.pill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill.ok{background:var(--ok3);color:var(--ok2)}
+button.pill{cursor:pointer}button.pill:hover{filter:brightness(.97)}
+.explore{flex:1;height:36px;padding:0 12px;border:0;border-radius:8px;background:var(--blue5);color:var(--blue1);display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;cursor:pointer}
+.explore:hover{background:var(--blue6)}
+.menu{position:absolute;top:44px;right:12px;z-index:31;width:212px;padding:8px;background:#fff;border-radius:8px;box-shadow:var(--shadow1);display:flex;flex-direction:column;gap:2px}
+.mi{height:32px;padding:0 8px;border:0;border-radius:6px;background:transparent;font-size:14px;text-align:left;cursor:pointer}
+.mi:hover{background:var(--g4)}
+
+/* Detail */
+.crumb{padding-left:28px;font-size:13px;line-height:16px;color:var(--black);text-decoration:none;align-self:flex-start}
+.crumb:hover{color:var(--blue3)}
+.back{width:20px;height:20px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.back:hover{color:var(--black)}
+.status{padding-left:28px;display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px}
+.tabs{display:flex;gap:8px;box-shadow:inset 0 -1px 0 var(--g3)}
+.tab{padding:0 8px 10px;border:0;background:transparent;font-size:14px;line-height:16px;color:var(--g1);cursor:pointer}
+.tab:hover{color:var(--blue3)}
+.tab[aria-selected="true"]{color:var(--blue1);font-weight:500;box-shadow:inset 0 -2px 0 var(--blue1)}
+.shd{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.shd p{margin:4px 0 0;max-width:640px;font-size:14px;line-height:20px;color:var(--g1)}
+.tbl{overflow-x:auto;padding-bottom:4px}
+table{width:100%;min-width:760px;border-collapse:separate;border-spacing:0;font-size:14px;line-height:16px}
+th{height:40px;padding:0 8px;background:var(--g4);color:var(--g1);font-weight:400;font-size:12px;text-align:left;white-space:nowrap}
+th:first-child{padding-left:16px;border-radius:8px 0 0 8px}
+th:last-child{padding-right:16px;border-radius:0 8px 8px 0;text-align:right}
+td{height:56px;padding:0 8px;border-bottom:1px solid var(--g3)}
+td:first-child{padding-left:16px;font-weight:500}
+td:last-child{padding-right:16px;text-align:right;white-space:nowrap}
+tbody tr:hover td{background:var(--g4)}
+tr.fresh td{background:var(--blue5)}
+.urlbox{max-width:460px;height:36px;padding:0 4px 0 12px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;gap:8px}
+.urlbox span{flex:1;min-width:0;font-family:"Roboto Mono",ui-monospace,monospace;font-size:12px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.copy{height:28px;padding:0 10px;flex:none;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:6px;background:var(--g4);font-size:13px;line-height:16px;font-weight:500;cursor:pointer}
+.copy:hover{background:var(--g3)}
+.copy.done{background:var(--ok3);color:var(--ok2)}
+.inslink{display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:16px;font-weight:500;text-decoration:none;white-space:nowrap}
+.ibtn{width:32px;height:32px;padding:0;border:0;border-radius:8px;background:var(--g4);color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;vertical-align:middle}
+.ibtn:hover{background:var(--g3);color:var(--black)}
+.ibtn.danger:hover{background:var(--err3);color:var(--err)}
+.ibtn + .ibtn{margin-left:8px}
+.empty{padding:32px 24px;border-radius:12px;border:1px dashed var(--g2);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.empty .logo{width:48px;height:48px;border-radius:16px;font-size:15px}
+.empty b{font-size:15px;line-height:20px}
+.empty span{max-width:420px;font-size:14px;line-height:20px;color:var(--g1)}
+
+/* Tooltips */
+.qt{position:relative;display:inline-flex;vertical-align:middle;margin-left:4px;border-radius:50%;cursor:help;outline:none}
+.qt .qb{display:none;position:absolute;top:calc(100% + 8px);z-index:20;width:280px;padding:8px 10px;border-radius:8px;background:rgba(20,22,26,.9);color:#fff;font-size:13px;line-height:18px;font-weight:400;text-align:left;white-space:normal}
+.qt .qb.l{left:-10px}.qt .qb.r{right:-10px}
+.qt:hover .qb,.qt:focus .qb{display:block}
+.qt:focus-visible{box-shadow:0 0 0 2px var(--blue1)}
+
+/* Mappings */
+.mgrid{display:grid;grid-template-columns:244px 244px 32px;column-gap:12px;align-items:center}
+.mhead{font-size:12px;line-height:16px;font-weight:500}
+.sel{position:relative}
+.sel select{width:100%;height:40px;padding:0 36px 0 12px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);appearance:none;-webkit-appearance:none;font-size:14px;cursor:pointer}
+.sel.ic select{padding-left:36px}
+.sel select:disabled{background:var(--g4);color:var(--g1);cursor:default}
+.sel .chev{position:absolute;right:12px;top:12px;pointer-events:none}
+.sel .lead{position:absolute;left:12px;top:12px;pointer-events:none}
+.atag{width:16px;height:16px;border-radius:4px;background:var(--g1);color:#fff;font-size:10px;line-height:16px;font-weight:600;text-align:center}
+.addf{width:500px;max-width:100%;height:36px;border:0;border-radius:8px;background:var(--blue5);color:var(--blue1);display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer}
+.addf:hover{background:var(--blue6)}
+.desc{max-width:680px;display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:20px;color:var(--text)}
+.desc p{margin:0}
+
+/* Modals */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(20,22,26,.2);display:flex;justify-content:center;align-items:flex-start;padding:100px 16px 16px;overflow-y:auto}
+.dialog{width:420px;max-width:100%;padding:24px;background:#fff;border-radius:20px;box-shadow:var(--shadow1);display:flex;flex-direction:column;gap:20px}
+.dhead{display:flex;align-items:center;gap:12px}
+.dhead h2{flex:1;margin:0;font-size:20px;line-height:24px;letter-spacing:-.4px;font-weight:600}
+.mlogo{width:32px;height:32px;flex:none;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.x{width:24px;height:24px;padding:0;border:0;background:transparent;color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.x:hover{color:var(--black)}
+.alert{display:flex;gap:10px;padding:12px;border-radius:12px;font-size:13px;line-height:18px}
+.alert.info{background:var(--notify2);color:var(--blue4)}
+.alert i{flex:none;width:24px;height:24px;border-radius:50%;background:var(--blue3);display:inline-flex;align-items:center;justify-content:center}
+.fields{display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font-size:12px;line-height:16px;font-weight:500;color:var(--g1)}
+.field input{height:40px;padding:8px 12px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);font-size:14px;outline:none}
+.field input:disabled{background:var(--g4);color:var(--g1)}
+.field input.bad{box-shadow:inset 0 0 0 1px var(--err),0 0 0 3px var(--err3)}
+.field .err{font-size:12px;line-height:16px;color:var(--err)}
+.field .help{font-size:12px;line-height:16px;color:var(--g1)}
+.dact{display:flex;gap:12px;margin-top:8px}
+.confirm{width:368px;max-width:100%;padding:16px 16px 24px;background:#fff;border-radius:20px;box-shadow:var(--shadow1);display:flex;flex-direction:column;align-items:center;position:relative}
+.confirm .x{position:absolute;top:16px;right:16px}
+.ctile{width:80px;height:80px;margin:16px 0 24px;border-radius:32px;background:var(--err3);display:flex;align-items:center;justify-content:center}
+.ctile i{width:32px;height:32px;border-radius:12px;background:var(--err);display:flex;align-items:center;justify-content:center}
+.confirm h2{margin:0 0 12px;width:280px;text-align:center;font-size:20px;line-height:24px;letter-spacing:-.4px;font-weight:400}
+.confirm p{margin:0 0 32px;width:280px;text-align:center;font-size:14px;line-height:20px;color:var(--g1)}
+.stack{width:100%;display:flex;flex-direction:column;gap:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;padding:10px 14px;border-radius:10px;background:rgba(20,22,26,.92);color:#fff;display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;white-space:nowrap;box-shadow:var(--shadow1)}
+
+/* Prototype switch */
+.proto{position:fixed;right:16px;bottom:16px;z-index:55;display:flex;align-items:center;gap:4px;padding:4px 4px 4px 12px;border-radius:12px;background:rgba(20,22,26,.92);color:#fff;font-size:12px;line-height:16px;box-shadow:var(--shadow1)}
+.proto span{margin-right:4px;color:#B7BFC8}
+.proto button{min-width:28px;height:28px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer}
+.proto button[aria-pressed="true"]{background:#fff;color:var(--black);font-weight:600}
+
+@media (max-width:800px){
+  .side{position:static;height:auto;width:100%;box-shadow:inset 0 -1px 0 var(--g3)}
+  .side .bottom{display:none}
+  .main{padding:24px 16px 96px}
+  h1{font-size:28px;line-height:32px;letter-spacing:-.56px}
+  .search input{width:100%}
+  .mgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px}
+  .proto span{display:none}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function () {
+  'use strict';
+
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+  const BASE = 'https://api.callloop.com/webhook/integration/clickbank/';
+
+  const IC = {
+    check: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" style="flex:none"><circle cx="8" cy="8" r="7" fill="#05944F"/><path d="M4.8 8.2l2.1 2.1 4.3-4.4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    chevR: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M6 4l4 4-4 4"/></svg>',
+    chevL: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4L6 8l4 4"/></svg>',
+    chevD: '<svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#757D8A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>',
+    dots: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>',
+    plus: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>',
+    x: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    copy: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></svg>',
+    tick: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+    ext: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h4v4M13 3L7.5 8.5M11 9.5V13H3V5h3.5"/></svg>',
+    pencil: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3-8 8H2.5v-3z"/></svg>',
+    unlink: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 9.5l-2 2a2.1 2.1 0 0 1-3-3l2-2M9.5 6.5l2-2a2.1 2.1 0 0 1 3 3l-2 2M2.5 2.5l11 11"/></svg>',
+    trash: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5h11M6 4.5V3h4v1.5M4 4.5l.7 9h6.6l.7-9M6.8 7v4M9.2 7v4"/></svg>',
+    phone: '<svg class="lead" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#757D8A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="4.5" y="2" width="7" height="12" rx="1.5"/><path d="M7.25 11.5h1.5"/></svg>',
+    search: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#757D8A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>',
+    q: '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#B7BFC8"/><path d="M6.3 6.2a1.8 1.8 0 0 1 3.5.5c0 1.2-1.8 1.4-1.8 2.5M8 11.4v.1" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    info: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 7.5v4M8 4.6v.1"/></svg>',
+    bang: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 6v5M10 14v.1"/></svg>',
+    api: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#757D8A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5.5 2v3M10.5 2v3M4 5h8v2.5a4 4 0 0 1-8 0zM8 11.5V14"/></svg>'
+  };
+  const tip = (text, side) => '<span class="qt" tabindex="0" role="img" aria-label="' + esc(text) + '">' + IC.q + '<span class="qb ' + side + '" aria-hidden="true">' + esc(text) + '</span></span>';
+
+  const SEED = [
+    { id: 'a1', name: 'callloop2', token: 'wh_7f3k9q2m' },
+    { id: 'a2', name: 'vendorstore', token: 'wh_p4x8n1za' },
+    { id: 'a3', name: 'springsale', token: 'wh_c2v6t0rb' }
+  ];
+  const CARDS = [
+    { name: 'ActiveCampaign', initials: 'AC', color: '#356AE6', native: true, kind: 'connect' },
+    { name: 'Keap', sub: '(Infusionsoft)', initials: 'K', color: '#2B8A3E', native: true, kind: 'connect' },
+    { name: 'HubSpot', initials: 'HS', color: '#C2410C', native: true, kind: 'connect' },
+    { name: 'GoHighLevel', initials: 'HL', color: '#14161A', native: true, kind: 'connect' },
+    { name: 'Zapier', initials: 'Z', color: '#C2410C', native: true, kind: 'connect' },
+    { name: 'Webhook', initials: 'W', color: '#1364F9', native: true, kind: 'manage' },
+    { name: 'ClickBank', initials: 'CB', color: '#14161A', native: true, kind: 'cb' },
+    { name: 'Shopify', initials: 'S', color: '#4D7C2F', native: true, kind: 'connected', status: 'Connected shop: call-loop' },
+    { name: 'Mailchimp', initials: 'M', color: '#14161A', native: true, kind: 'connected', status: 'Account Name: callloop' },
+    { name: 'AWeber', initials: 'AW', color: '#1D5FD1', kind: 'explore' },
+    { name: 'Drip', initials: 'D', color: '#B0179F', kind: 'explore' },
+    { name: 'Google Sheets', initials: 'GS', color: '#1E7E34', kind: 'explore' }
+  ];
+  const EXT = ['Phone Number', 'First Name', 'Last Name', 'Email', 'Country', 'Product SKU', 'Order amount', 'Transaction type'];
+  const CL = ['Phone', 'First Name', 'Last Name', 'Email', 'Country', 'Last purchase', 'Order total'];
+  const NAV = [
+    ['Account', 'M9 8.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 15.5c.6-3.2 3-5 6-5s5.4 1.8 6 5'],
+    ['Company', 'M2.5 15.5h13M4 15.5V3.5h6v12M10 7.5h4v8M6 6h2M6 9h2M6 12h2'],
+    ['Compliance', 'M9 2l6 2.5v4c0 3.5-2.6 6.3-6 7.5-3.4-1.2-6-4-6-7.5v-4zM6.5 9l1.8 1.8L11.5 7.5'],
+    ['Billing & Usage', 'M2.5 4.5h13v9h-13zM2.5 7.5h13M5 11h3'],
+    ['Numbers', 'M5.5 2h7v14h-7zM8.25 13.5h1.5'],
+    ['Integrations', 'M7 2.5h4v3a2 2 0 1 1-4 0zM2.5 7h3a2 2 0 1 1 0 4h-3zM7 15.5v-3a2 2 0 1 1 4 0v3zM15.5 7h-3a2 2 0 1 0 0 4h3z'],
+    ['Audio', 'M9 2.5a2.5 2.5 0 0 0-2.5 2.5v4a2.5 2.5 0 0 0 5 0V5A2.5 2.5 0 0 0 9 2.5zM4 9a5 5 0 0 0 10 0M9 14v2']
+  ];
+
+  const S = {
+    screen: 'list', tab: 'settings',
+    accounts: SEED.slice(0, 2), seq: 4,
+    modal: null, form: { name: '', api: '', secret: '' }, formErr: '',
+    menu: false, copied: null, toast: '', fresh: null, q: '',
+    mappings: [
+      { id: 'm1', ext: 'Phone Number', cl: 'Phone', locked: true },
+      { id: 'm2', ext: 'First Name', cl: 'First Name' },
+      { id: 'm3', ext: 'Last Name', cl: 'Last Name' },
+      { id: 'm4', ext: 'Email', cl: 'Email' }
+    ]
+  };
+  let toastTimer = null, copyTimer = null, focusAfter = null, lastFocusBtn = null;
+
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    S.toast = msg;
+    toastTimer = setTimeout(() => { S.toast = ''; render(); }, 3200);
+  }
+
+  /* ---------- views ---------- */
+  function sidebar() {
+    const ic = (d) => '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"/></svg>';
+    return '<nav class="side" aria-label="Settings"><div style="display:flex;flex-direction:column;gap:4px">' +
+      '<div class="shead">Settings<button type="button" class="sclose" data-act="demo" aria-label="Close settings"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>' +
+      '<div class="divider"></div>' +
+      NAV.map(([label, d]) => {
+        const on = label === 'Integrations';
+        return '<a href="#" class="nav' + (on ? ' on' : '') + '" data-act="' + (on ? 'toList' : 'demo') + '"' + (on ? ' aria-current="page"' : '') + '>' + ic(d) + esc(label) + '</a>';
+      }).join('') +
+      '<div class="divider"></div><a href="#" class="nav" data-act="demo">' + ic('M7 2.5H3.5v13H7M11.5 5.5L15 9l-3.5 3.5M15 9H7') + 'Log Out</a></div>' +
+      '<div class="bottom" style="display:flex;flex-direction:column;gap:4px">' +
+      '<a href="#" class="nav" data-act="demo">' + ic('M3 7v4h2l5 3V4L5 7zM13 6.5a3 3 0 0 1 0 5M5.5 11l1 4') + 'Product Updates</a>' +
+      '<a href="#" class="nav" data-act="demo">' + ic('M9 16a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM9 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM4 4l2.9 2.9M11.1 11.1L14 14M14 4l-2.9 2.9M6.9 11.1L4 14') + 'Help &amp; Support</a>' +
+      '<div class="plan"><div class="row" style="font-size:13px;line-height:16px"><strong>Pro Monthly 25K</strong><a href="#" data-act="demo" style="font-size:12px">Upgrade</a></div>' +
+      '<div class="prog" role="progressbar" aria-label="Credits used" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100"><i></i></div>' +
+      '<div class="row"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="#14161A"/><path d="M7 3.8l.9 1.9 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L4.1 6l2-.3z" fill="#fff"/></svg>19,875 credits</span><a href="#" data-act="demo">Buy</a></div></div>' +
+      '</div></nav>';
+  }
+
+  function listView() {
+    const count = S.accounts.length;
+    const q = S.q.trim().toLowerCase();
+    const cards = CARDS.filter((c) => !q || c.name.toLowerCase().includes(q));
+    const html = cards.map((c) => {
+      const cb = c.kind === 'cb';
+      const cbOn = cb && count > 0;
+      let act = '';
+      if (c.kind === 'connect' || (cb && count === 0)) {
+        act = '<button type="button" class="btn primary grow" data-act="' + (cb ? 'openConnect' : 'demo') + '">Connect</button><button type="button" class="btn secondary" data-act="demo">Docs</button>';
+      } else if (c.kind === 'manage') {
+        act = '<button type="button" class="btn primary grow" data-act="demo">Manage</button><button type="button" class="btn secondary" data-act="demo">Docs</button>';
+      } else if (c.kind === 'connected') {
+        act = '<div class="pill ok">' + IC.check + '<span>' + esc(c.status) + '</span></div>';
+      } else if (cbOn) {
+        act = '<button type="button" class="pill ok" data-act="toDetail" aria-label="ClickBank connected, ' + plural(count, 'account') + '. Manage accounts">' + IC.check + '<span>Connected · ' + plural(count, 'account') + '</span><span style="margin-left:auto;display:inline-flex">' + IC.chevR + '</span></button>';
+      } else {
+        act = '<button type="button" class="explore" data-act="demo">Explore' + IC.chevR + '</button>';
+      }
+      const hasMenu = c.kind === 'connected' || cbOn;
+      const menuOpen = cb && S.menu;
+      return '<div class="card"><div class="ctop">' + (c.native ? '<span class="native">Native</span>' : '<span></span>') +
+        (hasMenu ? '<button type="button" class="more" data-act="' + (cb ? 'toggleMenu' : 'demo') + '" aria-label="More actions for ' + esc(c.name) + '" aria-haspopup="menu" aria-expanded="' + !!menuOpen + '">' + IC.dots + '</button>' : '') +
+        '</div><div class="logo" aria-hidden="true" style="color:' + c.color + '">' + c.initials + '</div>' +
+        '<span class="cname">' + esc(c.name) + (c.sub ? ' <span class="muted">' + esc(c.sub) + '</span>' : '') + '</span>' +
+        '<div class="cact">' + act + '</div>' +
+        (menuOpen ? '<div class="menu" role="menu" aria-label="ClickBank actions"><button type="button" class="mi" role="menuitem" data-act="toDetail">Manage accounts</button><button type="button" class="mi" role="menuitem" data-act="openConnect">Connect another account</button><button type="button" class="mi" role="menuitem" data-act="demo">Docs</button></div>' : '') +
+        '</div>';
+    }).join('');
+    return '<div class="topbar"><h1>Integrations</h1><div style="display:flex;gap:12px;flex-wrap:wrap">' +
+      '<button type="button" class="btn secondary" data-act="demo">' + IC.api + 'Call Loop API</button>' +
+      '<div class="search">' + IC.search + '<input id="search" type="search" data-input="q" aria-label="Search integrations" placeholder="Search..." value="' + esc(S.q) + '"></div></div></div>' +
+      '<div class="grid">' + html + '</div>' +
+      (cards.length ? '' : '<p class="muted" style="margin:0">No integrations match “' + esc(S.q) + '”.</p>');
+  }
+
+  function detailView() {
+    const accs = S.accounts;
+    const count = accs.length;
+    const settings = S.tab === 'settings';
+    let body = '';
+    if (settings) {
+      const table = count ? '<div class="tbl"><table><thead><tr>' +
+        '<th scope="col" style="width:20%">Account</th>' +
+        '<th scope="col">INS Webhook URL' + tip('Copy the webhook URL, then paste it into the Instant Notification URL field in ClickBank.', 'l') + '</th>' +
+        '<th scope="col" style="width:18%">INS' + tip('Opens the INS settings page in ClickBank, where you can paste your INS webhook URL.', 'r') + '</th>' +
+        '<th scope="col" style="width:96px">Actions</th></tr></thead><tbody>' +
+        accs.map((a) => {
+          const url = BASE + a.token;
+          const done = S.copied === a.id;
+          return '<tr class="' + (S.fresh === a.id ? 'fresh' : '') + '"><td>' + esc(a.name) + '</td>' +
+            '<td><div class="urlbox"><span title="' + esc(url) + '">' + esc(url) + '</span><button type="button" class="copy' + (done ? ' done' : '') + '" data-act="copy" data-id="' + a.id + '" aria-label="Copy INS URL for ' + esc(a.name) + '">' + (done ? IC.tick + 'Copied' : IC.copy + 'Copy') + '</button></div></td>' +
+            '<td><a class="inslink" href="#" data-act="ins" data-id="' + a.id + '" aria-label="Open INS settings for ' + esc(a.name) + ' in ClickBank (opens in a new tab)">Open INS settings' + IC.ext + '</a></td>' +
+            '<td><button type="button" class="ibtn" data-act="edit" data-id="' + a.id + '" aria-label="Edit connection for ' + esc(a.name) + '" title="Edit connection">' + IC.pencil + '</button>' +
+            '<button type="button" class="ibtn danger" data-act="disconnect" data-id="' + a.id + '" aria-label="Disconnect ' + esc(a.name) + '" title="Disconnect">' + IC.unlink + '</button></td></tr>';
+        }).join('') + '</tbody></table></div>'
+        : '<div class="empty"><div class="logo" aria-hidden="true">CB</div><b>No ClickBank accounts connected</b><span>Connect an account to get its INS webhook URL and start adding ClickBank buyers to Call Loop.</span><button type="button" class="btn primary" data-act="openConnect" style="margin-top:8px">Connect ClickBank account</button></div>';
+      const opt = (list, v) => (v ? '' : '<option value="">Select field</option>') + list.map((x) => '<option value="' + esc(x) + '"' + (x === v ? ' selected' : '') + '>' + esc(x) + '</option>').join('');
+      const maps = S.mappings.map((m) =>
+        '<div class="mgrid"><div class="sel"><select aria-label="External field" data-map="' + m.id + '" data-key="ext">' + opt(EXT, m.ext) + '</select>' + IC.chevD + '</div>' +
+        '<div class="sel ic"><select aria-label="Call Loop field" data-map="' + m.id + '" data-key="cl"' + (m.locked ? ' disabled' : '') + '>' + opt(CL, m.cl) + '</select>' + (m.locked ? IC.phone : '<span class="lead atag" aria-hidden="true">A</span>') + IC.chevD + '</div>' +
+        (m.locked ? '<span></span>' : '<button type="button" class="ibtn danger" data-act="rmMap" data-id="' + m.id + '" aria-label="Remove mapping">' + IC.trash + '</button>') + '</div>').join('');
+      body = '<div style="display:flex;flex-direction:column;gap:40px">' +
+        '<section style="display:flex;flex-direction:column;gap:16px"><div class="shd"><div><h2 class="h2">Accounts</h2><p>Each account has its own INS webhook URL. Paste it into that account’s INS settings in ClickBank to start receiving orders.</p></div>' +
+        (count ? '<button type="button" class="btn blue" data-act="openConnect">' + IC.plus + 'Connect account</button>' : '') + '</div>' + table + '</section>' +
+        '<section style="display:flex;flex-direction:column;gap:16px"><h2 class="h2">Mappings' + tip('These mappings apply to all connected ClickBank accounts.', 'l') + '</h2>' +
+        '<div class="mgrid mhead"><span>External field</span><span>Call Loop field</span><span></span></div>' + maps +
+        '<button type="button" class="addf" data-act="addMap">' + IC.plus + 'Add field</button></section></div>';
+    } else {
+      body = '<div class="desc"><p>Connect one or more ClickBank vendor accounts to add buyers to Call Loop automatically. Every purchase, rebill or refund ClickBank sends through INS creates or updates the contact and can start a Trigger.</p><p>Each connected account gets its own INS webhook URL, so you can tell which store an order came from. Field mappings apply to every connected account.</p></div>';
+    }
+    return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap"><div style="display:flex;flex-direction:column;gap:4px">' +
+      '<a href="#" class="crumb" data-act="toList">Integrations</a>' +
+      '<div style="display:flex;align-items:center;gap:8px"><button type="button" class="back" data-act="toList" aria-label="Back to Integrations">' + IC.chevL + '</button><h1>ClickBank</h1></div>' +
+      '<div class="status">' + (count ? '<span style="display:inline-flex;align-items:center;gap:6px;color:#026233">' + IC.check + plural(count, 'account') + ' connected</span>' : '<span class="muted">Not connected</span>') + '</div></div>' +
+      '<button type="button" class="btn secondary" data-act="demo">Docs</button></div>' +
+      '<div class="tabs" role="tablist" aria-label="ClickBank"><button type="button" class="tab" role="tab" data-act="tab" data-v="settings" aria-selected="' + settings + '">Settings</button><button type="button" class="tab" role="tab" data-act="tab" data-v="description" aria-selected="' + !settings + '">Description</button></div>' +
+      body;
+  }
+
+  function modalView() {
+    const m = S.modal;
+    if (!m) return '';
+    const acc = m.id ? S.accounts.find((a) => a.id === m.id) : null;
+    if (m.type === 'disconnect') {
+      return '<div class="overlay" data-act="closeModal"><div class="confirm" role="alertdialog" aria-modal="true" aria-labelledby="dc-t" aria-describedby="dc-d">' +
+        '<button type="button" class="x" data-act="closeModal" aria-label="Close">' + IC.x + '</button>' +
+        '<div class="ctile"><i>' + IC.bang + '</i></div><h2 id="dc-t">Disconnect ' + esc(acc ? acc.name : '') + '?</h2>' +
+        '<p id="dc-d">Call Loop will stop receiving orders from this ClickBank account, and Triggers that use it will stop running. Other connected accounts keep working.</p>' +
+        '<div class="stack"><button type="button" class="btn danger" data-act="confirmDisconnect" data-autofocus>Yes, disconnect</button><button type="button" class="btn secondary" data-act="closeModal">Cancel</button></div></div></div>';
+    }
+    const isEdit = m.type === 'edit';
+    const f = S.form;
+    const disabled = isEdit ? !(f.api.trim() || f.secret.trim()) : !(f.name.trim() && f.api.trim() && f.secret.trim());
+    return '<div class="overlay" data-act="closeModal"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="m-t">' +
+      '<div class="dhead"><span class="mlogo" aria-hidden="true">CB</span><h2 id="m-t">' + (isEdit ? 'Edit ClickBank connection' : 'Connect ClickBank') + '</h2><button type="button" class="x" data-act="closeModal" aria-label="Close">' + IC.x + '</button></div>' +
+      '<div class="alert info"><i>' + IC.info + '</i><span>' + (isEdit ? 'Update the keys for this account. Its INS webhook URL stays the same.' : 'Enter your ClickBank account details to connect with Call Loop. You can connect as many accounts as you need.') + '</span></div>' +
+      '<div class="fields">' +
+      '<div class="field"><label for="f-name">Account name</label><input id="f-name" data-input="name" placeholder="Enter account name" autocomplete="off" value="' + esc(f.name) + '"' + (isEdit ? ' disabled' : '') + (S.formErr ? ' class="bad" aria-invalid="true" aria-describedby="f-name-err"' : '') + '>' + (S.formErr ? '<span class="err" id="f-name-err">' + esc(S.formErr) + '</span>' : '') + '</div>' +
+      '<div class="field"><label for="f-api">API key</label><input id="f-api" data-input="api" autocomplete="off" placeholder="' + (isEdit ? '•••• •••• •••• ' + esc(acc ? acc.token.slice(-4) : '') : 'Enter API key') + '" value="' + esc(f.api) + '"></div>' +
+      '<div class="field"><label for="f-secret">Secret key</label><input id="f-secret" type="password" data-input="secret" autocomplete="new-password" placeholder="' + (isEdit ? '••••••••••••' : 'Enter secret key') + '" value="' + esc(f.secret) + '">' + (isEdit ? '<span class="help">Leave a field blank to keep its current key.</span>' : '') + '</div>' +
+      '</div><div class="dact"><button type="button" class="btn primary" data-act="submit"' + (disabled ? ' disabled' : '') + '>' + (isEdit ? 'Save keys' : 'Connect') + '</button><button type="button" class="btn secondary" data-act="closeModal">Cancel</button></div></div></div>';
+  }
+
+  /* ---------- render ---------- */
+  const root = document.getElementById('root');
+  function render() {
+    const active = document.activeElement;
+    const keep = active && active.id && active.tagName === 'INPUT' ? { id: active.id, pos: active.selectionStart } : null;
+    root.innerHTML = '<div class="app">' + sidebar() + '<main class="main"><div class="wrap">' + (S.screen === 'list' ? listView() : detailView()) + '</div></main></div>' +
+      modalView() +
+      '<div aria-live="polite">' + (S.toast ? '<div class="toast">' + IC.check + esc(S.toast) + '</div>' : '') + '</div>' +
+      '<div class="proto" role="group" aria-label="Prototype: starting accounts"><span>Accounts:</span>' +
+      [0, 1, 2, 3].map((n) => '<button type="button" data-act="seed" data-v="' + n + '" aria-pressed="' + (S.accounts.length === n) + '">' + n + '</button>').join('') + '</div>';
+    document.title = (S.screen === 'list' ? 'Integrations' : 'ClickBank') + ' · Call Loop prototype';
+    const target = focusAfter ? document.getElementById(focusAfter) : (keep ? document.getElementById(keep.id) : null);
+    if (target) {
+      target.focus();
+      if (keep && target.id === keep.id && target.setSelectionRange && target.type !== 'password' && keep.pos != null) {
+        try { target.setSelectionRange(keep.pos, keep.pos); } catch (e) {}
+      }
+    } else if (S.modal) {
+      const af = root.querySelector('[data-autofocus]');
+      if (af && !root.querySelector('.overlay').contains(active)) af.focus();
+    }
+    focusAfter = null;
+  }
+
+  function openModal(m, form) {
+    lastFocusBtn = document.activeElement;
+    S.modal = m;
+    S.form = form || { name: '', api: '', secret: '' };
+    S.formErr = '';
+    S.menu = false;
+    focusAfter = m.type === 'connect' ? 'f-name' : (m.type === 'edit' ? 'f-api' : null);
+  }
+  function closeModal() {
+    S.modal = null;
+    if (lastFocusBtn && document.body.contains(lastFocusBtn)) setTimeout(() => lastFocusBtn && lastFocusBtn.focus(), 0);
+  }
+
+  function submit() {
+    const f = S.form;
+    if (S.modal.type === 'connect') {
+      const name = f.name.trim();
+      if (!name || !f.api.trim() || !f.secret.trim()) return;
+      if (S.accounts.some((a) => a.name.toLowerCase() === name.toLowerCase())) {
+        S.formErr = 'This ClickBank account is already connected.';
+        focusAfter = 'f-name';
+        return;
+      }
+      const id = 'a' + S.seq++;
+      S.accounts = S.accounts.concat({ id, name, token: 'wh_' + Math.random().toString(36).slice(2, 10) });
+      S.modal = null;
+      S.fresh = id;
+      S.screen = 'detail';
+      S.tab = 'settings';
+      window.scrollTo(0, 0);
+      showToast(name + ' connected. Copy its INS URL into ClickBank.');
+    } else {
+      if (!f.api.trim() && !f.secret.trim()) return;
+      const acc = S.accounts.find((a) => a.id === S.modal.id);
+      closeModal();
+      showToast('Keys updated for ' + (acc ? acc.name : 'account'));
+    }
+  }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (S.menu && !(t && ['toggleMenu', 'toDetail', 'openConnect'].includes(t.dataset.act))) S.menu = false;
+    if (!t) { render(); return; }
+    const act = t.dataset.act;
+    if (t.tagName === 'A') e.preventDefault();
+    if (act === 'closeModal' && t.classList.contains('overlay') && e.target !== t) return;
+    const acc = t.dataset.id ? S.accounts.find((a) => a.id === t.dataset.id) : null;
+    switch (act) {
+      case 'demo': showToast('Not part of this prototype'); break;
+      case 'toList': S.screen = 'list'; S.menu = false; window.scrollTo(0, 0); break;
+      case 'toDetail': S.screen = 'detail'; S.menu = false; S.fresh = null; window.scrollTo(0, 0); break;
+      case 'toggleMenu': S.menu = !S.menu; break;
+      case 'openConnect': openModal({ type: 'connect' }); break;
+      case 'tab': S.tab = t.dataset.v; break;
+      case 'copy': {
+        const url = BASE + acc.token;
+        try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).catch(() => {}); } catch (err) {}
+        clearTimeout(copyTimer);
+        S.copied = acc.id;
+        copyTimer = setTimeout(() => { S.copied = null; render(); }, 1800);
+        showToast('INS URL for ' + acc.name + ' copied');
+        break;
+      }
+      case 'ins': showToast('Would open ClickBank INS settings for ' + acc.name); break;
+      case 'edit': S.fresh = null; openModal({ type: 'edit', id: acc.id }, { name: acc.name, api: '', secret: '' }); break;
+      case 'disconnect': S.fresh = null; openModal({ type: 'disconnect', id: acc.id }); break;
+      case 'confirmDisconnect': {
+        const gone = S.accounts.find((a) => a.id === S.modal.id);
+        S.accounts = S.accounts.filter((a) => a.id !== S.modal.id);
+        S.modal = null;
+        showToast((gone ? gone.name : 'Account') + ' disconnected');
+        break;
+      }
+      case 'closeModal': closeModal(); break;
+      case 'submit': submit(); break;
+      case 'addMap': S.mappings = S.mappings.concat({ id: 'm' + S.seq++, ext: '', cl: '' }); break;
+      case 'rmMap': S.mappings = S.mappings.filter((m) => m.id !== t.dataset.id); break;
+      case 'seed': S.accounts = SEED.slice(0, +t.dataset.v); S.fresh = null; S.modal = null; break;
+    }
+    render();
+  });
+
+  document.addEventListener('input', (e) => {
+    const k = e.target.dataset && e.target.dataset.input;
+    if (!k) return;
+    if (k === 'q') S.q = e.target.value;
+    else { S.form = Object.assign({}, S.form, { [k]: e.target.value }); if (k === 'name') S.formErr = ''; }
+    render();
+  });
+
+  document.addEventListener('change', (e) => {
+    const id = e.target.dataset && e.target.dataset.map;
+    if (!id) return;
+    const key = e.target.dataset.key;
+    S.mappings = S.mappings.map((m) => m.id === id ? Object.assign({}, m, { [key]: e.target.value }) : m);
+    render();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (S.modal) { closeModal(); render(); }
+    else if (S.menu) { S.menu = false; render(); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
