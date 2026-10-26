@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call Loop — Design prototypes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Call Loop design system — synced from Figma "00 Design System" (BOVX8Hmx1HfwwBeDwOcZQL), 2026-10-19. Source of truth: design-system/tokens.css */
+  /* Primary */
+  --blue1:#1364F9;--blue2:#1854EA;--blue3:#1885EA;--blue4:#1362AC;--blue5:#E7EFFE;--blue6:#D0E0FE;
+  --blue1-dis:rgba(19,100,249,.4);--blue3-dis:rgba(24,133,234,.4);
+  --black:#14161A;--white:#FFFFFF;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;
+  --g2-dis:rgba(183,191,200,.45);--g2-light:rgba(183,191,200,.3);
+  --text:#2C2D2E; /* not a Figma style — kept for existing prototype usage */
+  /* Secondary */
+  --purple1:#7A16F5;--purple2:#C6AFE2;--purple3:#F0E4FF;--aqua1:#A4C5DB;--aqua2:#E4F4FF;
+  --orange1:#F86919;--orange2:#D6BAAA;--orange3:#FFEEE4;
+  /* States */
+  --ok:#05944F;--ok2:#026233;--ok3:#E7F6ED;--notify1:#2E9AE4;--notify2:#E6F7FF;
+  --warn1:#FFC043;--warn2:#BA7D04;--warn3:#855A04;--warn4:#FFF8E9;--err:#E11900;--err2:#A11200;--err3:#FFF1F0;
+  /* Gradients */
+  --grad1:linear-gradient(180deg,#F3F5F8 0%,#EEF5FF 100%);--grad2:linear-gradient(270deg,#F3F5F8 60%,rgba(243,245,248,.8) 100%);--grad3:#E7EFFE;
+  /* Effects */
+  --shadow1:0 0 2px rgba(83,102,137,.2),0 12px 16px rgba(83,102,137,.08),0 10px 40px rgba(83,102,137,.08);
+  --shadow2:0 4px 8px -2px rgba(27,46,94,.04);
+  --shadow3:0 0 2px rgba(83,102,137,.2),0 10px 20px rgba(83,102,137,.05),0 30px 50px rgba(83,102,137,.1);
+  /* Shape */
+  --r-xs:4px;--r:8px;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--grad1);color:var(--black);font:400 14px/20px var(--font);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:56px 24px 64px}
+.logo{display:inline-flex;align-items:center;gap:8px;font:600 14px/16px var(--font);color:var(--blue1);margin-bottom:24px}
+.logo i{width:24px;height:24px;border-radius:var(--r);background:var(--blue1);display:inline-block}
+h1{font:600 40px/48px var(--font);letter-spacing:-.02em;margin:0 0 8px}
+.lead{font:400 16px/24px var(--font);color:var(--g1);margin:0 0 40px;max-width:620px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;list-style:none;margin:0;padding:0}
+.card{display:flex;flex-direction:column;height:100%;padding:24px;background:var(--white);border:1px solid var(--g3);border-radius:var(--r);box-shadow:var(--shadow2);color:inherit;text-decoration:none;transition:box-shadow .15s,border-color .15s,transform .15s}
+.card:hover{border-color:var(--blue6);box-shadow:var(--shadow1);transform:translateY(-2px)}
+.card:focus-visible{outline:2px solid var(--blue1);outline-offset:2px}
+.num{align-self:flex-start;font:500 12px/16px var(--font);color:var(--blue1);background:var(--blue5);border-radius:var(--r-xs);padding:2px 8px;margin-bottom:16px}
+.card h2{font:600 20px/24px var(--font);letter-spacing:-.02em;margin:0 0 8px}
+.card p{margin:0 0 24px;color:var(--g1);flex:1}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px;border-top:1px solid var(--g4)}
+.path{font:400 12px/16px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--g1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.open{font:600 14px/16px var(--font);color:var(--blue1);white-space:nowrap}
+.card:hover .open{color:var(--blue2)}
+footer{margin-top:48px;color:var(--g1);font-size:12px}
+footer a{color:var(--blue1)}
+@media (max-width:600px){.wrap{padding:32px 16px 48px}h1{font-size:28px;line-height:32px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo"><i></i>Call Loop</div>
+  <h1>Design prototypes</h1>
+  <p class="lead">Clickable prototypes for upcoming Call Loop features. Pick one to open it; each also has a short link you can share directly.</p>
+  <ul class="grid" id="list"></ul>
+  <footer>Source and design-system notes: <a href="https://github.com/CallLoop/design-prototypes">CallLoop/design-prototypes</a></footer>
+</div>
+<script>
+// One entry per prototype. `slug` must match the redirect folder (e.g. analytics/index.html).
+const PROTOTYPES = [
+  {num:'02', slug:'analytics',  name:'Analytics',             file:'CallLoop-Analytics-Prototype.html', desc:'Analytics and reporting screens, plus a Forecast tab for credits, volume and value.'},
+  {num:'03', slug:'buy-number', name:'Buy number',            file:'CallLoop-BuyNumber-Prototype.html', desc:'Flow for searching for and buying a phone number.'},
+  {num:'04', slug:'clickbank',  name:'ClickBank integration', file:'CallLoop-ClickBank-Prototype.html', desc:'Connecting and using the ClickBank integration.'}
+];
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('list').innerHTML = PROTOTYPES.map(p => `
+  <li><a class="card" href="${esc(p.file)}">
+    <span class="num">${esc(p.num)}</span>
+    <h2>${esc(p.name)}</h2>
+    <p>${esc(p.desc)}</p>
+    <span class="foot"><span class="path">/${esc(p.slug)}</span><span class="open">Open →</span></span>
+  </a></li>`).join('');
+</script>
+</body>
+</html>

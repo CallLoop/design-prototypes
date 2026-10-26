@@ -8,11 +8,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 :root{
+  /* Call Loop design system — synced from Figma "00 Design System" (BOVX8Hmx1HfwwBeDwOcZQL), 2026-10-19. Source of truth: design-system/tokens.css */
+  /* Primary */
   --blue1:#1364F9;--blue2:#1854EA;--blue3:#1885EA;--blue4:#1362AC;--blue5:#E7EFFE;--blue6:#D0E0FE;
-  --black:#14161A;--text:#2C2D2E;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;
-  --aqua2:#E4F4FF;--ok:#05944F;--ok2:#026233;--ok3:#E7F6ED;--err:#E11900;--err2:#A11200;--err3:#FFF1F0;
-  --purple1:#7A16F5;--purple3:#F0E4FF;--notify2:#E6F7FF;
+  --blue1-dis:rgba(19,100,249,.4);--blue3-dis:rgba(24,133,234,.4);
+  --black:#14161A;--white:#FFFFFF;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;
+  --g2-dis:rgba(183,191,200,.45);--g2-light:rgba(183,191,200,.3);
+  --text:#2C2D2E; /* not a Figma style — kept for existing prototype usage */
+  /* Secondary */
+  --purple1:#7A16F5;--purple2:#C6AFE2;--purple3:#F0E4FF;--aqua1:#A4C5DB;--aqua2:#E4F4FF;
+  --orange1:#F86919;--orange2:#D6BAAA;--orange3:#FFEEE4;
+  /* States */
+  --ok:#05944F;--ok2:#026233;--ok3:#E7F6ED;--notify1:#2E9AE4;--notify2:#E6F7FF;
+  --warn1:#FFC043;--warn2:#BA7D04;--warn3:#855A04;--warn4:#FFF8E9;--err:#E11900;--err2:#A11200;--err3:#FFF1F0;
+  /* Gradients */
+  --grad1:linear-gradient(180deg,#F3F5F8 0%,#EEF5FF 100%);--grad2:linear-gradient(270deg,#F3F5F8 60%,rgba(243,245,248,.8) 100%);--grad3:#E7EFFE;
+  /* Effects */
   --shadow1:0 0 2px rgba(83,102,137,.2),0 12px 16px rgba(83,102,137,.08),0 10px 40px rgba(83,102,137,.08);
+  --shadow2:0 4px 8px -2px rgba(27,46,94,.04);
+  --shadow3:0 0 2px rgba(83,102,137,.2),0 10px 20px rgba(83,102,137,.05),0 30px 50px rgba(83,102,137,.1);
+  /* Shape */
+  --r-xs:4px;--r:8px;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--black);background:#fff;-webkit-font-smoothing:antialiased}
@@ -166,9 +183,9 @@ tr.fresh td{background:var(--blue5)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;padding:10px 14px;border-radius:10px;background:rgba(20,22,26,.92);color:#fff;display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;white-space:nowrap;box-shadow:var(--shadow1)}
 
 /* Prototype switch */
-.proto{position:fixed;right:16px;bottom:16px;z-index:55;display:flex;align-items:center;gap:4px;padding:4px 4px 4px 12px;border-radius:12px;background:rgba(20,22,26,.92);color:#fff;font-size:12px;line-height:16px;box-shadow:var(--shadow1)}
+.proto{position:fixed;right:16px;top:8px;z-index:55;display:flex;align-items:center;gap:4px;padding:2px 2px 2px 10px;border-radius:10px;background:rgba(20,22,26,.92);color:#fff;font-size:12px;line-height:16px;box-shadow:var(--shadow1)}
 .proto span{margin-right:4px;color:#B7BFC8}
-.proto button{min-width:28px;height:28px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer}
+.proto button{min-width:24px;height:24px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer}
 .proto button[aria-pressed="true"]{background:#fff;color:var(--black);font-weight:600}
 
 @media (max-width:800px){

@@ -8,11 +8,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --blue1:#1364F9;--blue2:#1854EA;--blue3:#1885EA;--blue5:#E7EFFE;--blue6:#D0E0FE;
-  --black:#14161A;--text:#2C2D2E;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;
-  --aqua2:#E4F4FF;--ok:#05944F;--ok2:#026233;--ok3:#E7F6ED;--warn2:#BA7D04;--err:#E11900;
-  --purple1:#7A16F5;--purple3:#F0E4FF;--orange1:#F86919;
+  /* Call Loop design system — synced from Figma "00 Design System" (BOVX8Hmx1HfwwBeDwOcZQL), 2026-10-19. Source of truth: design-system/tokens.css */
+  /* Primary */
+  --blue1:#1364F9;--blue2:#1854EA;--blue3:#1885EA;--blue4:#1362AC;--blue5:#E7EFFE;--blue6:#D0E0FE;
+  --blue1-dis:rgba(19,100,249,.4);--blue3-dis:rgba(24,133,234,.4);
+  --black:#14161A;--white:#FFFFFF;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;
+  --g2-dis:rgba(183,191,200,.45);--g2-light:rgba(183,191,200,.3);
+  --text:#2C2D2E; /* not a Figma style — kept for existing prototype usage */
+  /* Secondary */
+  --purple1:#7A16F5;--purple2:#C6AFE2;--purple3:#F0E4FF;--aqua1:#A4C5DB;--aqua2:#E4F4FF;
+  --orange1:#F86919;--orange2:#D6BAAA;--orange3:#FFEEE4;
+  /* States */
+  --ok:#05944F;--ok2:#026233;--ok3:#E7F6ED;--notify1:#2E9AE4;--notify2:#E6F7FF;
+  --warn1:#FFC043;--warn2:#BA7D04;--warn3:#855A04;--warn4:#FFF8E9;--err:#E11900;--err2:#A11200;--err3:#FFF1F0;
+  /* Gradients */
+  --grad1:linear-gradient(180deg,#F3F5F8 0%,#EEF5FF 100%);--grad2:linear-gradient(270deg,#F3F5F8 60%,rgba(243,245,248,.8) 100%);--grad3:#E7EFFE;
+  /* Effects */
   --shadow1:0 0 2px rgba(83,102,137,.2),0 12px 16px rgba(83,102,137,.08),0 10px 40px rgba(83,102,137,.08);
+  --shadow2:0 4px 8px -2px rgba(27,46,94,.04);
+  --shadow3:0 0 2px rgba(83,102,137,.2),0 10px 20px rgba(83,102,137,.05),0 30px 50px rgba(83,102,137,.1);
+  /* Shape */
+  --r-xs:4px;--r:8px;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--black);background:#fff;-webkit-font-smoothing:antialiased}
@@ -105,7 +122,7 @@ h1{margin:0;font-size:40px;line-height:48px;letter-spacing:-.8px;font-weight:600
 .hint{cursor:help;text-decoration:underline dotted var(--g2);text-underline-offset:3px}
 
 /* Tables */
-.tbl{overflow-x:auto}
+.tbl{position:relative;overflow-x:auto}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;line-height:16px}
 th{height:36px;padding:0 8px;background:var(--g4);color:var(--g1);font-weight:400;font-size:12px;text-align:left;white-space:nowrap}
 th:first-child{padding-left:12px;border-radius:8px 0 0 8px}
@@ -137,6 +154,7 @@ tr:hover .eye,.eye:focus{opacity:1}
 .track{display:flex}
 .col{flex:1 0 0;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;border-right:1px dashed var(--g3)}
 .scroll.x .col{flex:1 0 56px}
+.scroll.x.fcx .col{flex:1 0 0}
 .bararea{height:180px;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
 .col:hover .bararea{background:var(--g4)}
 .stack{width:72%;max-width:44px;display:flex;flex-direction:column-reverse;gap:2px}
@@ -171,14 +189,149 @@ tr:hover .eye,.eye:focus{opacity:1}
 .fl{font-size:10px;line-height:12px;color:var(--g1);text-align:center}
 .fempty{align-self:stretch;width:100%;max-width:260px;margin:4px 12px 0;padding:12px;border-radius:12px;background:#fff;border:1px dashed var(--g2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}
 .fempty b{font-size:14px;line-height:20px}
+.fcol.wide{flex-grow:2}
+.fplot{overflow-x:auto;padding-bottom:4px}
 .fempty span{font-size:12px;line-height:16px;color:var(--g1)}
 .btn-sb{margin-top:4px;height:32px;padding:8px 12px;border-radius:8px;background:var(--blue5);color:var(--blue1);font-size:14px;line-height:16px;font-weight:600;text-decoration:none;white-space:nowrap}
 .btn-sb:hover{background:var(--blue6);color:var(--blue1)}
+.fempty .btn-sb{height:auto;white-space:normal;text-align:center}
+
+/* Forecast */
+.tab .new{margin-left:6px;padding:1px 6px;font-size:10px;line-height:12px;vertical-align:1px}
+.fnote{display:flex;align-items:flex-start;gap:8px;margin:0;font-size:13px;line-height:20px;color:var(--g1)}
+.fnote svg{flex:none;margin-top:3px}
+.fnote b{font-weight:500;color:var(--black)}
+.stat .sub{display:block;margin-top:-6px;font-size:12px;line-height:16px;color:var(--g1)}
+.stat .sub + .sub{margin-top:-8px}
+.stat .up{color:var(--ok)}.stat .down{color:var(--warn2)}.stat .warn{color:var(--warn2)}
+.alert{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:12px;font-size:14px;line-height:20px}
+.alert svg{flex:none}
+.alert p{flex:1 1 320px;margin:0}
+.alert.warn{background:var(--warn4);color:var(--warn3)}
+.alert.info{background:var(--notify2);color:var(--black)}
+.alert .acts{display:flex;align-items:center;gap:12px}
+.btn-p{height:32px;padding:8px 12px;border-radius:8px;background:var(--blue1);color:#fff;font-size:14px;line-height:16px;font-weight:600;text-decoration:none;white-space:nowrap}
+.btn-p:hover{background:var(--blue2);color:#fff}
+.pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;line-height:16px;font-weight:500}
+.pill.hi{background:var(--ok3);color:var(--ok2)}
+.pill.md{background:var(--blue5);color:var(--blue2)}
+.pill.lo{background:var(--warn4);color:var(--warn3)}
+tr.tot td{font-weight:600;border-bottom:0}
+.fcx .track{align-items:stretch}
+.fzone{display:flex;flex-direction:column;min-width:0}
+.fzone.fut{border-left:1.5px dashed var(--blue1)}
+.zl{height:16px;padding-left:6px;font-size:10px;line-height:12px;color:var(--g1);white-space:nowrap}
+.fzone.fut .zl{color:var(--blue1);font-weight:600}
+.zcols{flex:1;display:flex}
+.fcx .bararea{position:relative}
+.seg.fut{background-image:repeating-linear-gradient(135deg,rgba(20,22,26,.13) 0 1.5px,transparent 1.5px 5px)}
+.seg.usual{outline:1px dashed var(--blue1);outline-offset:-1px}
+.whisk{position:absolute;left:50%;width:1.5px;background:var(--g1);transform:translateX(-50%)}
+.whisk::before,.whisk::after{content:"";position:absolute;left:-4px;width:9.5px;height:1.5px;background:var(--g1)}
+.whisk::before{top:0}.whisk::after{bottom:0}
+.legend .lg-f{width:14px;height:10px;background-color:var(--g3);background-image:repeating-linear-gradient(135deg,rgba(20,22,26,.25) 0 1.5px,transparent 1.5px 5px)}
+.legend .lg-w{width:9px;height:12px;border-radius:0;background:linear-gradient(var(--g1),var(--g1)) center/1.5px 100% no-repeat,linear-gradient(var(--g1),var(--g1)) top/100% 1.5px no-repeat,linear-gradient(var(--g1),var(--g1)) bottom/100% 1.5px no-repeat}
+.ctip em{font-style:normal;color:var(--g2)}
+.sec{display:flex;flex-direction:column;gap:12px}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:4px 16px;flex-wrap:wrap}
+.sec-h p{margin:0;font-size:12px;line-height:16px;color:var(--g1)}
+.divsec{margin-top:16px;padding-top:32px;border-top:1px solid var(--g3)}
+.hl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.hlc{padding:12px 14px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;flex-direction:column;gap:4px}
+.hlc span{font-size:12px;line-height:16px;font-weight:500;color:var(--blue1)}
+.hlc p{margin:0;font-size:13px;line-height:20px}
+.hlc b,.gfoot b,.plan b{font-weight:600}
+.growth{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+.gcard{padding:12px 14px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;flex-direction:column;gap:6px;min-width:0}
+.glab{display:flex;justify-content:space-between;gap:8px;font-size:13px;line-height:16px;color:var(--text)}
+.glab .muted{font-size:12px}
+.gval{font-size:22px;line-height:28px;letter-spacing:-.4px}
+.gval .muted{font-size:13px;letter-spacing:0}
+.gd{font-size:12px;line-height:16px;color:var(--g1)}
+.gd .up{color:var(--ok)}.gd .down{color:var(--warn2)}
+.gcard svg{margin:6px 0 2px}
+.gfoot{font-size:12px;line-height:16px;color:var(--text)}
+.plan{padding:16px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;flex-direction:column;gap:12px}
+.plan p{margin:0;font-size:13px;line-height:20px}
+.pbar{display:flex;gap:2px;height:10px;border-radius:5px;background:var(--g4);overflow:hidden}
+.pbar span{display:block;height:100%;background:var(--blue1)}
+.pbar .over{background:var(--warn1)}
+.pleg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;line-height:16px;color:var(--text)}
+.pleg span{display:inline-flex;align-items:center;gap:6px}
+.pleg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.plan .acts{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.phead{display:flex;flex-direction:column;gap:10px}
+.phead .glab{width:100%}
+.plink{font-size:14px;line-height:16px;font-weight:500;text-decoration:none}
+.plan .pnote{font-size:12px;line-height:16px}
+.segc{display:inline-flex;align-self:flex-start;padding:2px;border-radius:8px;background:var(--g4)}
+.segc button{height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;font-size:13px;color:var(--g1);cursor:pointer}
+.segc button[aria-pressed="true"]{background:#fff;color:var(--black);font-weight:500;box-shadow:var(--shadow2),0 0 0 1px var(--g3)}
+.segc button:focus-visible{outline:2px solid var(--blue1);outline-offset:1px}
+.tiers{display:flex;flex-wrap:wrap;gap:6px}
+.tier{min-width:52px;padding:6px 8px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);display:inline-flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;line-height:16px;font-weight:500}
+.tier small{font-size:10px;line-height:12px;font-weight:400;color:var(--g1)}
+.tier.below{color:var(--g2)}
+.tier.cur{box-shadow:inset 0 0 0 1.5px var(--g1)}
+.tier.rec{background:var(--blue5);box-shadow:inset 0 0 0 1.5px var(--blue1);color:var(--blue1)}
+.tier.rec small{color:var(--blue1)}
+.how{border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3)}
+.how > button{width:100%;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:transparent;font-size:14px;line-height:20px;font-weight:600;cursor:pointer;text-align:left}
+.how > button:focus-visible{outline:2px solid var(--blue1);outline-offset:-2px;border-radius:12px}
+.how > button[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.how dl{margin:0;padding:0 16px 16px;display:grid;grid-template-columns:minmax(140px,200px) minmax(0,1fr);gap:10px 24px;font-size:13px;line-height:20px}
+.how dt{color:var(--g1)}
+.how dd{margin:0}
+
+/* Plan modals */
+button.btn-sb,button.btn-p,button.plink{border:0;cursor:pointer;font-family:inherit}
+button.plink{padding:0;background:transparent;color:var(--blue1)}
+button.plink:hover{color:var(--blue2)}
+.ovl{position:fixed;inset:0;z-index:70;background:rgba(20,22,26,.2);display:flex;justify-content:center;align-items:flex-start;padding:40px 16px;overflow-y:auto}
+.dlg{width:900px;max-width:100%;padding:28px 32px;background:#fff;border-radius:20px;box-shadow:var(--shadow1);display:flex;flex-direction:column;gap:20px;outline:none}
+.dlg.pay{width:780px}
+.dtop{display:flex;align-items:center;gap:24px}
+.dtop h2{margin:0;font-size:20px;line-height:24px;letter-spacing:-.4px;font-weight:600}
+.dtop .xbtn{margin-left:auto}
+.xbtn{width:32px;height:32px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.xbtn:hover{color:var(--black);background:var(--g4)}
+.xbtn:focus-visible,.ropt:focus-within,.steps .n:focus-visible,.btn:focus-visible{outline:2px solid var(--blue1);outline-offset:1px}
+.dsub{margin:-8px 0 0;font-size:14px;line-height:20px;color:var(--text)}
+.dsub b{font-weight:600}
+tr.bestrow td{background:var(--ok3)}
+tr.bestrow td:first-child{border-radius:8px 0 0 8px}
+tr.bestrow td:last-child{border-radius:0 8px 8px 0}
+.pill.gr{background:var(--g3);color:var(--text)}
+.save{padding:2px 6px;border-radius:6px;background:var(--ok3);color:var(--ok);font-size:12px;line-height:16px;font-weight:500;white-space:nowrap}
+.steps{display:flex;align-items:center;gap:8px;font-size:14px;line-height:16px;font-weight:500;color:var(--blue1)}
+.steps .n{width:24px;height:24px;padding:0;border:0;border-radius:6px;background:var(--blue1);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.steps button.n{cursor:pointer}.steps button.n:hover{background:var(--blue2)}
+.paygrid{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:24px;align-items:start}
+.flab{display:block;margin-bottom:8px;font-size:12px;line-height:16px;color:var(--g1)}
+.ropt{display:flex;align-items:center;gap:8px;min-height:32px;margin-bottom:8px;padding:6px 12px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);font-size:14px;line-height:20px;cursor:pointer}
+.ropt:hover{box-shadow:inset 0 0 0 1px var(--g2)}
+.ropt input{flex:none;width:16px;height:16px;margin:0 4px 0 0;accent-color:var(--blue1);cursor:pointer}
+.ropt b{margin-left:8px;font-weight:600}
+.ropt .muted{margin-left:-4px}
+.cardsel{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);font-size:14px;line-height:16px}
+.visa{width:32px;height:20px;border-radius:3px;box-shadow:inset 0 0 0 1px var(--g3);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-style:italic;color:#1A1F71}
+.dpanel{padding:16px;border-radius:16px;background:var(--g4);display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:20px}
+.dpanel .dt{font-weight:600}
+.dpanel .r{display:flex;justify-content:space-between;gap:12px;color:var(--g1)}
+.dpanel .r b{color:var(--black);font-weight:500;text-align:right}
+.dpanel .tot,.dpanel .tot b{color:var(--black);font-weight:600}
+.dpanel hr{width:100%;margin:0;border:0;border-top:1px solid var(--g3)}
+.dpanel small{margin-top:-10px;font-size:11px;line-height:14px}
+.dact{display:flex;gap:12px;margin-top:4px}
+.btn{height:40px;padding:0 16px;display:inline-flex;align-items:center;border:0;border-radius:8px;font-size:14px;line-height:16px;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--blue1);color:#fff}.btn.primary:hover{background:var(--blue2)}
+.btn.secondary{background:var(--g2-light);color:var(--black)}.btn.secondary:hover{background:var(--g3)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;padding:10px 14px;border-radius:10px;background:rgba(20,22,26,.92);color:#fff;font-size:14px;line-height:20px;white-space:nowrap;box-shadow:var(--shadow1)}
 
 /* Prototype switch */
-.proto{position:fixed;right:16px;bottom:16px;z-index:60;display:flex;align-items:center;gap:4px;padding:4px 4px 4px 12px;border-radius:12px;background:rgba(20,22,26,.92);color:#fff;font-size:12px;line-height:16px;box-shadow:var(--shadow1)}
+.proto{position:fixed;right:16px;top:8px;z-index:60;display:flex;align-items:center;gap:4px;padding:2px 2px 2px 10px;border-radius:10px;background:rgba(20,22,26,.92);color:#fff;font-size:12px;line-height:16px;box-shadow:var(--shadow1)}
 .proto span{margin-right:4px;color:#B7BFC8}
-.proto button{height:28px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer}
+.proto button{height:24px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer}
 .proto button[aria-pressed="true"]{background:#fff;color:var(--black);font-weight:600}
 
 @media (max-width:800px){
@@ -190,6 +343,16 @@ tr:hover .eye,.eye:focus{opacity:1}
   .presets{width:auto;flex-direction:row;flex-wrap:wrap;box-shadow:inset 0 -1px 0 var(--g3)}
   .calpop .month + .month{display:none}
   .two{grid-template-columns:minmax(0,1fr)}
+  .scroll{overflow-x:auto}
+  .col{min-width:44px}
+  .scroll.x.fcx .col{min-width:0}
+  .fempty{margin:4px 0 0;padding:10px 8px}
+  .fempty .btn-sb{padding:6px 8px;font-size:13px}
+  .how dl{grid-template-columns:minmax(0,1fr);gap:2px}
+  .dlg{padding:24px 16px}
+  .dtop{flex-wrap:wrap;gap:12px}
+  .paygrid{grid-template-columns:minmax(0,1fr)}
+  .how dd{margin-bottom:10px}
   .proto span{display:none}
 }
 </style>
@@ -223,7 +386,11 @@ tr:hover .eye,.eye:focus{opacity:1}
     left: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4L6 8l4 4"/></svg>',
     right: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l4 4-4 4"/></svg>',
     eye: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M1.5 9S4.2 4 9 4s7.5 5 7.5 5-2.7 5-7.5 5-7.5-5-7.5-5z"/><circle cx="9" cy="9" r="2.2"/></svg>',
-    info: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.3v3.7M8 5v.1"/></svg>'
+    info: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.3v3.7M8 5v.1"/></svg>',
+    trend: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#757D8A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 11.5l3.5-3.5 2.5 2 5-5.5M10 4.5h3.5V8"/></svg>',
+    bcast: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#757D8A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 2.5l-11 4.8 4.5 1.7 1.7 4.5zM7 9l3-3"/></svg>',
+    warn: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#BA7D04" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L1.8 17h16.4z"/><path d="M10 8.5v3.8M10 14.6v.1"/></svg>',
+    note: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#2E9AE4" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v5M10 6.2v.1"/></svg>'
   };
 
   /* ---------- shared data ---------- */
@@ -263,9 +430,20 @@ tr:hover .eye,.eye:focus{opacity:1}
     phones: [],
     gran: {},
     open: null,
-    q: ''
+    q: '',
+    fh: '30',
+    fb: '90',
+    fbc: 'sched',
+    fnew: false,
+    how: false,
+    pcyc: 'monthly',
+    modal: null, // 'compare' | 'pay'
+    mcyc: 'monthly',
+    pay: null, // { c, cyc }
+    perMonth: 0,
+    toast: ''
   };
-  const PAGES = ['messages', 'credits', 'sms', 'voice', 'ringless'];
+  const PAGES = ['messages', 'credits', 'forecast', 'sms', 'voice', 'ringless'];
   let DD = {};
 
   function factors() {
@@ -355,7 +533,8 @@ tr:hover .eye,.eye:focus{opacity:1}
     return '<div class="stats">' + list.map((s) =>
       '<div class="stat"><div class="top"><span class="lab">' + esc(s.label) +
       (s.tip ? '<span class="tip" tabindex="0" role="img" aria-label="' + esc(s.tip) + '">' + IC.info + '<span class="tb">' + esc(s.tip) + '</span></span>' : '') +
-      '</span>' + (s.pct ? '<span class="muted">' + s.pct + '</span>' : '') + '</div><span class="val">' + s.value + '</span></div>'
+      '</span>' + (s.pct ? '<span class="muted">' + s.pct + '</span>' : '') + '</div><span class="val">' + s.value + '</span>' +
+      (s.sub || []).map((x) => '<span class="sub">' + x + '</span>').join('') + '</div>'
     ).join('') + '</div>';
   }
 
@@ -434,11 +613,11 @@ tr:hover .eye,.eye:focus{opacity:1}
             '<div class="fbar" style="height:' + h.toFixed(1) + 'px;padding-top:' + (inside ? 10 : 0) + 'px">' + (inside ? label : '') + '</div></div>';
         }).join('');
       }
-      return '<div class="fcol"><div class="farea" style="height:' + plotH + 'px">' + inner + '</div><span class="fl">' + esc(st.label) + '</span></div>';
+      return '<div class="fcol' + (st.empty ? ' wide' : '') + '"><div class="farea" style="height:' + plotH + 'px">' + inner + '</div><span class="fl">' + esc(st.label) + '</span></div>';
     }).join('');
     const aria = title + ': ' + stages.map((s) => s.label + ' ' + (s.empty ? s.empty.title : s.bars.map((b) => b.n).join(' and '))).join(', ');
     return '<section class="funnel"><div class="fhead"><h3 class="h3">' + esc(title) + '</h3>' + (caption ? '<p>' + esc(caption) + '</p>' : '') + '</div>' +
-      '<div class="plot" role="img" aria-label="' + esc(aria) + '"><div class="yax" aria-hidden="true" style="height:' + plotH + 'px">' + ticks.map((t) => '<span>' + t + '</span>').join('') + '</div><div class="fcols">' + cols + '</div></div></section>';
+      '<div class="plot fplot" role="img" aria-label="' + esc(aria) + '"><div class="yax" aria-hidden="true" style="height:' + plotH + 'px">' + ticks.map((t) => '<span>' + t + '</span>').join('') + '</div><div class="fcols" style="min-width:' + stages.reduce((a, st) => a + (st.empty ? 200 : st.bars.length * 80 + 16), 0) + 'px">' + cols + '</div></div></section>';
   }
 
   function table(head, rows, minW) {
@@ -483,7 +662,8 @@ tr:hover .eye,.eye:focus{opacity:1}
 
   function tabs(active) {
     return '<nav class="tabs" aria-label="Analytics sections"><a class="tab' + (active === 'messages' ? ' on' : '') + '" href="#messages"' + (active === 'messages' ? ' aria-current="page"' : '') + '>Messages</a>' +
-      '<a class="tab' + (active === 'credits' ? ' on' : '') + '" href="#credits"' + (active === 'credits' ? ' aria-current="page"' : '') + '>Credit Usage</a></nav>';
+      '<a class="tab' + (active === 'credits' ? ' on' : '') + '" href="#credits"' + (active === 'credits' ? ' aria-current="page"' : '') + '>Credit Usage</a>' +
+      '<a class="tab' + (active === 'forecast' ? ' on' : '') + '" href="#forecast"' + (active === 'forecast' ? ' aria-current="page"' : '') + '>Forecast<span class="new">Beta</span></a></nav>';
   }
 
   function detailHeader(title) {
@@ -519,7 +699,7 @@ tr:hover .eye,.eye:focus{opacity:1}
       { label: 'Inbound', value: n(base.inb) },
       { label: 'Success', value: n(base.ok), pct: pctS(base.ok / base.out) },
       { label: 'Failed', value: n(base.fail), pct: pctS(base.fail / base.out) },
-      { label: 'Engagements', value: n(base.eng), tip: 'Link clicks (SMS) + calls transferred (Voice) + callbacks (Ringless)' },
+      { label: 'Engagements', value: S.empty ? '0' : n(base.eng), tip: 'Link clicks (SMS) + calls transferred (Voice) + callbacks (Ringless)' },
       { label: 'Opt-outs', value: n(base.opt), pct: base.opt == null ? '' : pctS(base.opt / base.ok) },
       { label: 'Credits used', value: n(base.cred) }
     ];
@@ -541,10 +721,10 @@ tr:hover .eye,.eye:focus{opacity:1}
         '<a class="chl" href="' + href[c.id] + '">' + c.label + ' ›</a>',
         n(c.out),
         '<span style="color:' + (c.r >= 0.85 ? '#05944F' : '#BA7D04') + '">' + c.rate + '</span>',
-        n(c.eng) + ' ' + c.engUnit + ' <span class="muted">· ' + pctS(c.eng / c.engBase) + ' ' + engLabel + '</span>',
+        (S.empty ? '0' : n(c.eng)) + ' ' + c.engUnit + ' <span class="muted">· ' + pctS(S.empty ? 0 : c.eng / c.engBase) + ' ' + engLabel + '</span>',
         c.opt == null ? '<span class="muted" aria-label="Not available">—</span>' : n(c.opt) + ' <span style="color:' + (optRate > 0.03 ? '#BA7D04' : '#757D8A') + '">· ' + pctS(optRate) + '</span>',
-        '<span style="font-weight:500">' + (c.cred / c.eng).toFixed(1) + '</span> <span class="muted">credits / ' + c.cpeUnit + '</span>',
-        c.rev == null ? '<span class="muted">Not tracked</span>' : money(c.rev * f),
+        S.empty ? '<span class="muted" aria-label="Not available yet">—</span>' : '<span style="font-weight:500">' + (c.cred / c.eng).toFixed(1) + '</span> <span class="muted">credits / ' + c.cpeUnit + '</span>',
+        c.rev == null ? '<span class="muted">Not tracked</span>' : money(S.empty ? 0 : c.rev * f),
         '<a class="eye" href="' + href[c.id] + '" aria-label="View ' + c.label + ' details">' + IC.eye + '</a>'
       ];
     });
@@ -747,19 +927,613 @@ tr:hover .eye,.eye:focus{opacity:1}
                 CB.filter((x) => S.src === 'all' || x.id === S.src).map((x) => [esc(x.label), fmt(x.n * f), fmt(x.n * f), '1.00']), 600)) + '</section>';
   }
 
+  /* ---------- forecast model ---------- */
+  const WDS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dOff = (o) => new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() + o);
+  const offOf = (d) => Math.round((d - TODAY) / 864e5);
+  const fmtS = (d) => MS[d.getMonth()] + ' ' + d.getDate();
+  const CHS = ['sms', 'voice', 'ringless'];
+  const CH_LABEL = { sms: 'SMS', voice: 'Voice', ringless: 'Ringless' };
+  const CH_UNIT = { sms: 'clicks', voice: 'transfers', ringless: 'callbacks' };
+  const FC = {
+    balance: 14021,
+    credit: { sms: 1.35, voice: 3.6, ringless: 2 },
+    // engagements per message sent: SMS clicks, Voice transfers, Ringless callbacks
+    eng: { sms: 0.94 * 0.085, voice: 0.879 * 0.563 * 0.43, ringless: 0.717 * 0.26 },
+    revPerClick: 9.16,
+    engTrend: 0.015, // engagement rates improve ~1.5% a month
+    accuracy: 0.962, // last full month: forecast ÷ actual revenue
+    plan: { line: 'Pro', cycle: 'monthly', credits: 2500 }, // credits a month
+    usualPerWeek: 175,
+    newDays: 9,
+    flows: [
+      { id: 'camp', perDay: 18, trend: 0.06, spread: 0.15, mix: { sms: 0.7, voice: 0.15, ringless: 0.15 }, basis: '3 active campaigns · ~125 new enrollments a week',
+        items: [['New lead nurture', 0.5], ['Abandoned cart', 0.3], ['Post-purchase review', 0.2]] },
+      { id: 'trig', perDay: 12, trend: 0.12, spread: 0.25, mix: { sms: 0.8, voice: 0.2, ringless: 0 }, basis: '2 active triggers · ~85 webhook events a week',
+        items: [['Shopify: order created', 0.65], ['Calendly: booking made', 0.35]] },
+      { id: 'other', perDay: 26, trend: 0.03, spread: 0.2, mix: { sms: 0.85, voice: 0.15, ringless: 0 }, basis: 'Inbox replies, API, keywords, web forms, Zapier, HubSpot' }
+    ],
+    scheduled: [
+      { name: 'Labor Day sale', date: new Date(2026, 8, 4), ch: 'sms', n: 520 },
+      { name: 'September newsletter', date: new Date(2026, 8, 10), ch: 'sms', n: 380 },
+      { name: 'Webinar reminder', date: new Date(2026, 8, 17), ch: 'sms', n: 240 },
+      { name: 'Open house drop', date: new Date(2026, 9, 7), ch: 'ringless', n: 220 },
+      { name: 'Fall promo call', date: new Date(2026, 8, 29), ch: 'voice', n: 180 },
+      { name: 'Black Friday early access', date: new Date(2026, 9, 21), ch: 'sms', n: 640 },
+      { name: 'Halloween offer', date: new Date(2026, 9, 29), ch: 'sms', n: 450 }
+    ]
+  };
+  // Pro plans: c = credits a month (annual plans get c × 12 a year), m = monthly price, a = annual price, x = price per extra credit
+  const PRO = [
+    { c: 250, m: 15, a: 151, x: 0.045 }, { c: 500, m: 25, a: 252, x: 0.04 }, { c: 1000, m: 49, a: 504, x: 0.035 },
+    { c: 2500, m: 99, a: 1008, x: 0.0325 }, { c: 5000, m: 179, a: 1812, x: 0.0315 }, { c: 7500, m: 249, a: 2520, x: 0.031 },
+    { c: 10000, m: 329, a: 3324, x: 0.03 }, { c: 25000, m: 749, a: 7560, x: 0.0295 }, { c: 35000, m: 1049, a: 10584, x: 0.0285 },
+    { c: 50000, m: 1499, a: 15120, x: 0.028 }
+  ];
+  const kfmt = (v) => v >= 1000 ? Number((v / 1000).toFixed(1)) + 'K' : String(Math.round(v));
+  const usd = (v) => Math.abs(v - Math.round(v)) < 0.005 ? '$' + fmt(v) : money(v);
+  const cents = (v) => Number((v * 100).toFixed(2)) + '¢';
+  const proTier = (c) => PRO.find((t) => t.c === c);
+  const planName = (t, cyc) => 'Pro ' + (cyc === 'annual' ? 'Annual ' + kfmt(t.c * 12) : 'Monthly ' + kfmt(t.c));
+  // Monthly-equivalent cost of covering `perMonth` credits on a plan: plan price + extra credits at that plan's rate
+  function planCost(t, cyc, perMonth) {
+    const price = cyc === 'annual' ? t.a / 12 : t.m;
+    const extra = Math.max(0, perMonth - t.c);
+    return { t, cyc, price, extra, extraCost: extra * t.x, total: price + extra * t.x };
+  }
+  // Cheapest option; within $1, prefer the bigger plan (more room to grow)
+  // Plans we may suggest: bigger than the current one, or the same one billed annually instead of monthly
+  function upgrades(perMonth, cycles) {
+    const cur = proTier(FC.plan.credits);
+    return cycles.flatMap((cyc) => PRO.filter((t) => t.c > cur.c || (t === cur && cyc === 'annual' && FC.plan.cycle === 'monthly')).map((t) => planCost(t, cyc, perMonth)));
+  }
+  function cheapest(opts) {
+    const min = Math.min(...opts.map((o) => o.total));
+    return opts.filter((o) => o.total <= min + 1).pop();
+  }
+
+  const FSER = [
+    { id: 'bc', label: 'Broadcasts', color: '#D0E0FE' },
+    { id: 'usual', label: 'Usual broadcasts', color: '#D0E0FE', cls: 'usual' },
+    { id: 'camp', label: 'Campaigns', color: '#C6AFE2' },
+    { id: 'trig', label: 'Triggers', color: '#F6CD92' },
+    { id: 'other', label: 'Inbox, API & other', color: '#A4C5DB' }
+  ];
+  // A shorter basis reacts faster to recent change: steeper trend, wider range
+  const BASIS = { 30: { level: 1.05, trend: 1.5, spread: 1.35 }, 90: { level: 1, trend: 1, spread: 1 }, 180: { level: 0.93, trend: 0.7, spread: 0.85 } };
+  const WK = [0.55, 1.1, 1.15, 1.1, 1.1, 1, 0.6]; // Sun..Sat, mean 0.943
+  const frnd = (o, j) => { const x = Math.sin(o * 12.9898 + j * 78.233) * 43758.5453; return x - Math.floor(x); };
+  const zero = () => ({ sms: 0, voice: 0, ringless: 0 });
+
+  // Messages per channel for each series on day `o` (0 = today, negative = history)
+  function fDay(o) {
+    const out = { bc: zero(), usual: zero(), camp: zero(), trig: zero(), other: zero() };
+    const wk = WK[dOff(o).getDay()] / 0.943;
+    if (o <= 0) {
+      if (S.fnew && o <= -FC.newDays) return out;
+      if (o <= -6 && (-o - 6) % 14 === 0) out.bc.sms = Math.round(280 + 140 * frnd(o, 9));
+      FC.flows.forEach((fl, j) => {
+        const v = fl.perDay * Math.pow(1 + fl.trend, o / 30) * wk * (0.75 + 0.5 * frnd(o, j));
+        CHS.forEach((c) => { out[fl.id][c] = v * fl.mix[c]; });
+      });
+      return out;
+    }
+    FC.scheduled.forEach((b) => { if (offOf(b.date) === o) out.bc[b.ch] += b.n; });
+    if (S.fnew) return out;
+    if (S.fbc === 'usual' && !FC.scheduled.some((b) => Math.abs(offOf(b.date) - o) <= 3)) out.usual.sms = FC.usualPerWeek / 7;
+    const B = BASIS[S.fb];
+    FC.flows.forEach((fl) => {
+      const v = fl.perDay * B.level * Math.pow(1 + fl.trend * B.trend, o / 30) * wk;
+      CHS.forEach((c) => { out[fl.id][c] = v * fl.mix[c]; });
+    });
+    return out;
+  }
+
+  function fSum(a, b) {
+    const t = {};
+    FSER.forEach((s) => { t[s.id] = zero(); });
+    for (let o = a; o <= b; o++) {
+      const d = fDay(o);
+      FSER.forEach((s) => CHS.forEach((c) => { t[s.id][c] += d[s.id][c]; }));
+    }
+    return t;
+  }
+
+  function fMet(ch, m, all) {
+    const chs = all || S.svc === 'all' ? CHS : [S.svc];
+    const k = (c) => m === 'messages' ? 1 : m === 'credits' ? FC.credit[c] : m === 'engagements' ? FC.eng[c] : (c === 'sms' ? FC.eng.sms * FC.revPerClick : 0);
+    return chs.reduce((a, c) => a + ch[c] * k(c), 0);
+  }
+
+  function fSpread(id) {
+    if (id === 'bc') return 0.03;
+    if (id === 'usual') return 0.35;
+    const h = +S.fh;
+    return FC.flows.find((x) => x.id === id).spread * BASIS[S.fb].spread * (h === 7 ? 0.8 : h === 90 ? 1.25 : 1);
+  }
+
+  function fTot(t, m, fut) {
+    let v = 0, lo = 0, hi = 0;
+    FSER.forEach((s) => {
+      const x = fMet(t[s.id], m);
+      const sp = fut ? fSpread(s.id) : 0;
+      v += x; lo += x * (1 - sp); hi += x * (1 + sp);
+    });
+    return { v, lo, hi };
+  }
+
+  // Days until the balance runs out at forecast pace (all channels); Infinity past a year
+  function fRunway() {
+    if (S.fnew) return null;
+    let left = FC.balance;
+    for (let o = 1; o <= 365; o++) {
+      const d = fDay(o);
+      FSER.forEach((s) => { left -= fMet(d[s.id], 'credits', true); });
+      if (left <= 0) return o;
+    }
+    return Infinity;
+  }
+
+  const fTrend = () => {
+    const tot = FC.flows.reduce((a, f) => a + f.perDay, 0);
+    return FC.flows.reduce((a, f) => a + f.perDay * f.trend, 0) / tot * BASIS[S.fb].trend;
+  };
+  const sgnPct = (r) => (r >= 0 ? '+' : '−') + Math.round(Math.abs(r) * 100) + '%';
+  const rr = (v) => v >= 1000 ? Math.round(v / 10) * 10 : Math.round(v);
+  const fv = (m, v) => (m === 'revenue' ? '$' : '') + fmt(v);
+  const niceMax = (v) => { if (!(v > 0)) return 4; const p = Math.pow(10, Math.floor(Math.log10(v))); return [1, 2, 2.5, 5, 10].find((x) => x * p >= v) * p; };
+  const shortN = (v, m) => (m === 'revenue' ? '$' : '') + (v >= 1000 ? (v / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : fmt(v));
+  const swatch = (s) => '<i style="width:10px;height:10px;border-radius:3px;display:inline-block;flex:none;background:' + s.color + (s.cls ? ';outline:1px dashed var(--blue1);outline-offset:-1px' : '') + '"></i>';
+
+  function fBuckets(h) {
+    const res = [];
+    if (h === 7) {
+      for (let o = -13; o <= 7; o++) res.push({ a: o, b: o, fut: o > 0 });
+    } else {
+      const hw = h === 30 ? 12 : 13;
+      for (let k = hw - 1; k >= 0; k--) res.push({ a: -7 * k - 6, b: -7 * k, fut: false });
+      for (let o = 1; o <= h; o += 7) res.push({ a: o, b: Math.min(h, o + 6), fut: true });
+    }
+    return res;
+  }
+
+  function fChart(h) {
+    const m = 'credits';
+    const ser = FSER.filter((s) => s.id !== 'usual' || (S.fbc === 'usual' && !S.fnew));
+    const data = fBuckets(h).map((b) => {
+      const t = fSum(b.a, b.b);
+      return { b, tot: fTot(t, m, b.fut), vals: ser.map((s) => fMet(t[s.id], m)) };
+    });
+    const max = niceMax(Math.max(...data.map((d) => d.tot.hi)));
+    const H = 180;
+    const nH = data.filter((d) => !d.b.fut).length;
+    const sparse = data.length > 14;
+    const col = (d, i) => {
+      const a = dOff(d.b.a), z = dOff(d.b.b), days = d.b.b - d.b.a + 1;
+      const full = days === 1 ? WDS[a.getDay()] + ', ' + fmtS(a) : fmtS(a) + ' – ' + fmtS(z) + (days < 7 ? ' (' + days + ' days)' : '');
+      const show = !sparse || ((i - nH) % 2 + 2) % 2 === 0;
+      const segs = ser.map((s, j) => d.vals[j] > 0.05 * max / 100 ? '<div class="seg' + (d.b.fut ? ' fut' : '') + (s.cls ? ' ' + s.cls : '') + '" style="height:' + Math.max(1.5, d.vals[j] / max * H).toFixed(1) + 'px;background-color:' + s.color + '"></div>' : '').join('');
+      const wh = d.b.fut && d.tot.hi - d.tot.lo > 0 ? '<span class="whisk" style="bottom:' + (d.tot.lo / max * H).toFixed(1) + 'px;height:' + ((d.tot.hi - d.tot.lo) / max * H).toFixed(1) + 'px"></span>' : '';
+      const tip = '<div class="ctip"><strong>' + esc(full) + ' · ' + (d.b.fut ? 'Forecast' : 'Actual') + '</strong>' +
+        ser.map((s, j) => d.vals[j] >= 0.5 ? '<span>' + swatch(s) + esc(s.label) + ' - ' + fv(m, d.vals[j]) + '</span>' : '').join('') +
+        '<span>Total - ' + fv(m, d.tot.v) + (d.b.fut ? ' <em>(likely ' + fv(m, rr(d.tot.lo)) + '–' + fv(m, rr(d.tot.hi)) + ')</em>' : '') + '</span></div>';
+      return '<div class="col' + (i >= data.length - 4 ? ' flip' : '') + '"><div class="bararea">' + wh + '<div class="stack">' + segs + '</div></div><span class="xl">' + (show ? esc(days > 1 && days < 7 ? fmtS(a) + '–' + (z.getMonth() === a.getMonth() ? z.getDate() : fmtS(z)) : fmtS(a)) : '&nbsp;') + '</span>' + tip + '</div>';
+    };
+    const cols = data.map(col);
+    const titles = { credits: 'Credits used and forecast', messages: 'Messages sent and forecast', engagements: 'Engagements and forecast', revenue: 'Revenue and forecast' };
+    const ticks = [4, 3, 2, 1, 0].map((k) => shortN(max / 4 * k, m));
+    const minW = data.length * 26;
+    return '<section class="chart"><div class="chead"><h2 class="h3">' + titles[m] + '</h2><ul class="legend" aria-label="Legend">' +
+      ser.map((s) => '<li>' + swatch(s) + esc(s.label) + '</li>').join('') +
+      '<li><i class="lg-f"></i>Forecast</li><li><i class="lg-w"></i>Likely range</li></ul></div>' +
+      '<div class="plot"><div class="yax" aria-hidden="true" style="margin-top:11px">' + ticks.map((t) => '<span>' + t + '</span>').join('') + '</div>' +
+      '<div class="scroll x fcx"><div class="track" role="img" aria-label="' + esc(titles[m] + ': actual for the last ' + (h === 7 ? '14 days' : nH + ' weeks') + ', forecast for the next ' + h + ' days') + '" style="min-width:' + minW + 'px">' +
+      '<div class="fzone" style="flex:' + nH + ' 1 0"><div class="zl">Actual</div><div class="zcols">' + cols.slice(0, nH).join('') + '</div></div>' +
+      '<div class="fzone fut" style="flex:' + (data.length - nH) + ' 1 0"><div class="zl">Forecast →</div><div class="zcols">' + cols.slice(nH).join('') + '</div></div>' +
+      '</div></div></div></section>';
+  }
+
+  // Calendar months: 11 full months back, the current month (actual to date + forecast), 3 months ahead
+  function fMonths() {
+    // Long-range trend always includes usual broadcasts, or months with nothing scheduled yet would look like a drop
+    const keep = S.fbc;
+    S.fbc = 'usual';
+    const rows = [];
+    for (let k = -11; k <= 3; k++) {
+      const s = new Date(TODAY.getFullYear(), TODAY.getMonth() + k, 1);
+      const e = new Date(TODAY.getFullYear(), TODAY.getMonth() + k + 1, 0);
+      const a = offOf(s), b = offOf(e);
+      const t = fSum(a, b);
+      const fut = k > 0;
+      const ef = Math.pow(1 + FC.engTrend, (a + b) / 2 / 30);
+      const widen = fut ? 0.6 + 0.4 * k : 1;
+      const row = { k, d: s, fut, now: k === 0 };
+      ['messages', 'credits', 'engagements', 'revenue'].forEach((m) => {
+        const x = fTot(t, m, fut);
+        const f = m === 'engagements' || m === 'revenue' ? ef : 1;
+        row[m] = { v: x.v * f, lo: (x.v - (x.v - x.lo) * widen) * f, hi: (x.v + (x.hi - x.v) * widen) * f };
+      });
+      const e1 = row.engagements;
+      row.cpe = e1.v ? { v: row.credits.v / e1.v, lo: row.credits.v / e1.hi, hi: row.credits.v / e1.lo } : { v: 0, lo: 0, hi: 0 };
+      rows.push(row);
+    }
+    S.fbc = keep;
+    return rows;
+  }
+
+  const monLab = (d, yr) => MS[d.getMonth()] + (yr ? ' ’' + String(d.getFullYear()).slice(2) : '');
+
+  // Small line chart: actual solid, forecast dashed with a likely-range band
+  function trendLine(rows, key, f, label) {
+    const W = 280, H = 96, top = 8, bot = 20;
+    const n = rows.length;
+    const iL = rows.findIndex((r) => r.now) - 1; // last full month
+    const x = (i) => 6 + i * (W - 12) / (n - 1);
+    const max = Math.max(...rows.map((r) => r[key].hi)) * 1.08 || 1;
+    const y = (v) => top + (H - top - bot) * (1 - v / max);
+    const pt = (i, v) => x(i).toFixed(1) + ',' + y(v).toFixed(1);
+    const act = rows.slice(0, iL + 1).map((r, i) => pt(i, r[key].v)).join(' ');
+    const fc = rows.slice(iL).map((r, j) => pt(iL + j, r[key].v)).join(' ');
+    const band = rows.slice(iL).map((r, j) => pt(iL + j, j ? r[key].hi : r[key].v)).join(' ') + ' ' +
+      rows.slice(iL).map((r, j) => pt(iL + j, j ? r[key].lo : r[key].v)).reverse().join(' ');
+    const tx = x(iL + TODAY.getDate() / 31);
+    const dots = rows.map((r, i) => {
+      const t = monLab(r.d, true) + (r.fut ? ' forecast' : r.now ? ' (to date + forecast)' : '') + ': ' + f(r[key].v) + (r.fut ? ' (likely ' + f(r[key].lo) + '–' + f(r[key].hi) + ')' : '');
+      return '<g><title>' + esc(t) + '</title><circle cx="' + x(i).toFixed(1) + '" cy="' + y(r[key].v).toFixed(1) + '" r="2.5" style="fill:' + (r.fut || r.now ? '#fff' : 'var(--blue1)') + ';stroke:var(--blue1);stroke-width:1.5"/>' +
+        '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(r[key].v).toFixed(1) + '" r="9" fill="transparent"/></g>';
+    }).join('');
+    const lab = (i, anchor, txt) => '<text x="' + x(i).toFixed(1) + '" y="' + (H - 4) + '" text-anchor="' + anchor + '" style="fill:var(--g1);font-size:10px">' + txt + '</text>';
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc(label) + '" style="display:block;overflow:visible">' +
+      '<line x1="0" x2="' + W + '" y1="' + (H - bot) + '" y2="' + (H - bot) + '" style="stroke:var(--g3)"/>' +
+      '<polygon points="' + band + '" style="fill:var(--blue5)"/>' +
+      '<line x1="' + tx.toFixed(1) + '" x2="' + tx.toFixed(1) + '" y1="' + (top - 4) + '" y2="' + (H - bot) + '" style="stroke:var(--g2);stroke-dasharray:2 3"/>' +
+      '<polyline points="' + act + '" fill="none" style="stroke:var(--blue1);stroke-width:2;stroke-linejoin:round"/>' +
+      '<polyline points="' + fc + '" fill="none" style="stroke:var(--blue1);stroke-width:2;stroke-dasharray:4 3;stroke-linejoin:round"/>' +
+      dots + lab(0, 'start', monLab(rows[0].d, true)) + lab(iL + 1, 'middle', 'Today') + lab(n - 1, 'end', monLab(rows[n - 1].d)) + '</svg>';
+  }
+
+  function pageForecast() {
+    const h = +S.fh, bas = +S.fb;
+    const cur = fSum(1, h);
+    // Compare with the basis period's average pace, scaled to the forecast length
+    const prev = fSum(1 - bas, 0);
+    const T = {};
+    // Engagement rates keep improving (FC.engTrend), so value metrics are adjusted to each period's midpoint
+    const efF = Math.pow(1 + FC.engTrend, h / 2 / 30);
+    ['credits', 'messages', 'engagements', 'revenue'].forEach((m) => {
+      const val = m === 'engagements' || m === 'revenue';
+      const x = fTot(cur, m, true), k = val ? efF : 1;
+      T[m] = { f: { v: x.v * k, lo: x.lo * k, hi: x.hi * k }, p: fTot(prev, m, false).v * h / bas * (val ? Math.pow(1 + FC.engTrend, -bas / 2 / 30) : 1) };
+    });
+    const sched = FC.scheduled.filter((b) => { const o = offOf(b.date); return o >= 1 && o <= h && (S.svc === 'all' || b.ch === S.svc); });
+    const runway = fRunway();
+    const credAll = FSER.reduce((a, s) => a + fMet(cur[s.id], 'credits', true), 0);
+    const revTracked = S.svc === 'all' || S.svc === 'sms';
+    const readyOn = dOff(14 - FC.newDays);
+
+    const delta = (m, good) => {
+      if (S.fnew) return 'No earlier period to compare';
+      const r = T[m].f.v / T[m].p - 1;
+      return '<span class="' + (good ? (r >= 0 ? 'up' : 'down') : '') + '">' + (r >= 0 ? '↑ ' : '↓ ') + Math.round(Math.abs(r) * 100) + '%</span> vs your ' + bas + '-day average';
+    };
+    const range = (m) => T[m].f.hi > 0 ? 'Likely ' + fv(m, rr(T[m].f.lo)) + ' – ' + fv(m, rr(T[m].f.hi)) : 'Nothing to forecast yet';
+    let balSub;
+    if (runway === null) balSub = ['Runout date: not enough data yet'];
+    else if (runway === Infinity) balSub = ['Lasts 12+ months at this pace'];
+    else balSub = ['Lasts until ~' + fmtS(dOff(runway)) + (runway <= h ? ' · <span class="warn">before this period ends</span>' : '')];
+    balSub.push(credAll > FC.balance
+      ? '<span class="warn">Needs ≈ ' + fmt(rr(credAll - FC.balance)) + ' more for this period</span>'
+      : '≈ ' + fmt(FC.balance - credAll) + ' left after ' + fmtS(dOff(h)));
+
+    const note = S.fnew
+      ? '<b>' + fmtD(dOff(1)) + ' – ' + fmtD(dOff(h)) + '.</b> Your account has ' + FC.newDays + ' days of sending, so this forecast only counts scheduled broadcasts' +
+        (sched.length ? ' (' + sched.length + ' in this period).' : ', and none are scheduled in this period yet.')
+      : '<b>' + fmtD(dOff(1)) + ' – ' + fmtD(dOff(h)) + '.</b> Based on your sending from ' + fmtS(dOff(1 - bas)) + ' to ' + fmtS(TODAY) + ', a ' + sgnPct(fTrend()) + ' monthly trend' +
+        (sched.length ? ' and ' + sched.length + ' scheduled broadcast' + (sched.length === 1 ? '' : 's') : ' (no broadcasts scheduled yet)') + '. These are estimates, not guarantees.';
+
+    let alert = '';
+    if (S.fnew) {
+      alert = '<div class="alert info" role="status">' + IC.note + '<p>Campaigns, triggers and other sending are added to the forecast after 14 days of history, on <b>' + fmtS(readyOn) + '</b>. Until then, only scheduled broadcasts are counted.</p></div>';
+    } else if (runway !== Infinity && runway <= h) {
+      const weekly = fTot(cur, revTracked ? 'revenue' : 'engagements', true).v / h * 7;
+      alert = '<div class="alert warn" role="alert">' + IC.warn + '<p>At this pace, your credits run out around <b>' + fmtD(dOff(runway)) + '</b>, ' + (h - runway) + ' days before this period ends. Campaigns and triggers would pause, and they bring in about <b>' +
+        (revTracked ? fv('revenue', rr(weekly)) : fmt(weekly) + ' engagements') + ' a week</b>.</p>' +
+        '<div class="acts"><button type="button" class="btn-p" data-act="mopen">Upgrade plan</button></div></div>';
+    }
+
+    // Return on credits: revenue (or engagements when revenue isn't tracked) per 100 credits
+    const roM = revTracked ? 'revenue' : 'engagements';
+    const roF = T.credits.f.v ? T[roM].f.v / T.credits.f.v * 100 : 0;
+    const roP = T.credits.p ? T[roM].p / T.credits.p * 100 : 0;
+    const roDelta = S.fnew || !roP ? 'No earlier period to compare'
+      : '<span class="' + (roF >= roP ? 'up' : 'down') + '">' + (roF >= roP ? '↑ ' : '↓ ') + Math.round(Math.abs(roF / roP - 1) * 100) + '%</span> vs your ' + bas + '-day average';
+    const st = [
+      revTracked
+        ? { label: 'Expected revenue', value: '≈ ' + fv('revenue', T.revenue.f.v), sub: [range('revenue'), delta('revenue', true)], tip: 'Expected from SMS link clicks, at your average of ' + money(FC.revPerClick) + ' per click from conversion tracking.' }
+        : { label: 'Expected revenue', value: '<span class="muted">—</span>', sub: ['Tracked for SMS only'] },
+      { label: 'Engagements', value: '≈ ' + fmt(T.engagements.f.v), sub: [range('engagements'), delta('engagements', true)], tip: 'Link clicks (SMS) + calls transferred (Voice) + callbacks (Ringless), at your recent rates.' },
+      { label: 'Return on credits', value: roF ? (revTracked ? '$' + roF.toFixed(0) : roF.toFixed(1)) : '<span class="muted">—</span>', sub: [revTracked ? 'revenue per 100 credits' : 'engagements per 100 credits', roDelta],
+        tip: 'What every 100 credits brings back: ' + (revTracked ? 'expected revenue' : 'expected engagements') + ' ÷ credits used × 100.' },
+      { label: 'Messages', value: '≈ ' + fmt(T.messages.f.v), sub: [range('messages'), delta('messages', true)], tip: 'SMS and MMS sent, calls placed and ringless drops sent.' }
+    ];
+
+    // Highlights
+    const M = S.fnew ? null : fMonths();
+    const iL = M ? M.findIndex((r) => r.now) - 1 : 0;
+    const hl = [];
+    if (M) {
+      const fast = FC.flows.filter((f) => f.items).reduce((a, f) => f.trend > a.trend ? f : a);
+      hl.push(['Growing fastest', ({ camp: 'Campaigns', trig: 'Triggers' })[fast.id] + ' are up <b>' + sgnPct(fast.trend * BASIS[S.fb].trend) + ' a month</b>, led by ' + esc(fast.items[0][0]) + '.']);
+      const c0 = M[0].cpe.v, c1 = M[iL].cpe.v;
+      if (c0 && c1 < c0) hl.push(['More efficient', 'Each engagement costs <b>' + Math.round((1 - c1 / c0) * 100) + '% fewer credits</b> than in ' + monLab(M[0].d, true) + '.']);
+    }
+    const val = (b) => revTracked ? (b.ch === 'sms' ? b.n * FC.eng.sms * FC.revPerClick : 0) : b.n * FC.eng[b.ch];
+    const big = sched.slice().sort((a, b) => val(b) - val(a))[0];
+    if (big) hl.push(['Coming up', esc(big.name) + ' on ' + fmtS(big.date) + ' should bring <b>≈ ' + fmt(big.n * FC.eng[big.ch]) + ' ' + CH_UNIT[big.ch] + '</b>' +
+      (big.ch === 'sms' && revTracked ? ' and <b>' + fv('revenue', big.n * FC.eng.sms * FC.revPerClick) + '</b>' : '') + '.']);
+    if (M && revTracked) {
+      const act = M[iL].revenue.v;
+      hl.push(['Forecast accuracy', 'Our ' + ML[M[iL].d.getMonth()] + ' forecast was <b>' + Math.round(FC.accuracy * 100) + '% accurate</b>: ' + fv('revenue', rr(act * FC.accuracy)) + ' forecast, ' + fv('revenue', rr(act)) + ' actual.']);
+    }
+    const highlights = hl.length ? '<section class="hl" aria-label="Highlights">' + hl.map((x) => '<div class="hlc"><span>' + x[0] + '</span><p>' + x[1] + '</p></div>').join('') + '</section>' : '';
+
+    // How you're growing
+    let growth;
+    if (!M) {
+      growth = emptyBox('Growth trends need a full month of sending', 'Monthly revenue, engagement and message trends appear here after ' + ML[(TODAY.getMonth() + 1) % 12] + ' 1.');
+    } else {
+      const money0 = (v) => '$' + fmt(v);
+      const cards = [
+        revTracked ? { key: 'revenue', label: 'Revenue', f: money0, unit: '/ month' } : null,
+        { key: 'engagements', label: 'Engagements', f: fmt, unit: '/ month' },
+        { key: 'messages', label: 'Messages', f: fmt, unit: '/ month' },
+        { key: 'cpe', label: 'Credits per engagement', f: (v) => v.toFixed(1), unit: '', down: true }
+      ].filter(Boolean).map((c) => {
+        const first = M[0][c.key].v, last = M[iL][c.key].v, end = M[M.length - 1][c.key];
+        const mo = Math.pow(last / first, 1 / iL) - 1;
+        const good = c.down ? last <= first : last >= first;
+        const d = c.down
+          ? '<span class="' + (good ? 'up' : 'down') + '">' + (last <= first ? '↓ ' : '↑ ') + Math.round(Math.abs(last / first - 1) * 100) + '%</span> since ' + monLab(M[0].d, true)
+          : '<span class="' + (good ? 'up' : 'down') + '">' + (mo >= 0 ? '↑ ' : '↓ ') + (Math.abs(mo) * 100).toFixed(1) + '% a month</span> · ' + sgnPct(last / first - 1) + ' since ' + monLab(M[0].d, true);
+        return '<div class="gcard"><div class="glab">' + c.label + '<span class="muted">' + ML[M[iL].d.getMonth()] + '</span></div>' +
+          '<div class="gval">' + c.f(last) + (c.unit ? ' <span class="muted">' + c.unit + '</span>' : '') + '</div><div class="gd">' + d + '</div>' +
+          trendLine(M, c.key, c.f, c.label + ' by month, ' + monLab(M[0].d, true) + ' to ' + monLab(M[M.length - 1].d, true) + ', with forecast') +
+          '<div class="gfoot">' + monLab(M[M.length - 1].d) + ' forecast: <b>' + c.f(end.v) + '</b> <span class="muted">(likely ' + c.f(end.lo) + '–' + c.f(end.hi) + ')</span></div></div>';
+      }).join('');
+      growth = '<div class="growth">' + cards + '</div>';
+    }
+
+    // Plan fit: what covering the forecast costs on each Pro plan
+    const ptip = (t) => '<span class="tip" tabindex="0" role="img" aria-label="' + esc(t) + '">' + IC.info + '<span class="tb">' + esc(t) + '</span></span>';
+    const yr = S.pcyc === 'annual';
+    const mult = yr ? 12 : 1, per = yr ? 'a year' : 'a month';
+    const perMonth = credAll / h * 30;
+    S.perMonth = perMonth;
+    const need = perMonth * mult;
+    const curT = proTier(FC.plan.credits);
+    const now = planCost(curT, FC.plan.cycle, perMonth);
+    const top = PRO[PRO.length - 1];
+    const custom = perMonth > top.c;
+    // Only ever suggest moving up: a bigger plan, or the same plan billed annually. Suggest it only if it costs less.
+    const ups = upgrades(perMonth, S.pcyc === 'monthly' ? ['monthly', 'annual'] : ['annual']);
+    const cand = ups.length ? cheapest(ups) : null;
+    const pick = cand && cand.total < now.total - 1 ? cand : null;
+    const cycleSw = '<div class="segc" role="group" aria-label="Billing cycle">' +
+      [['monthly', 'Monthly'], ['annual', 'Annually']].map((c) => '<button type="button" data-act="pcyc" data-v="' + c[0] + '" aria-pressed="' + (S.pcyc === c[0]) + '">' + c[1] + '</button>').join('') + '</div>';
+    const tiers = '<div class="tiers" role="list" aria-label="Pro plans, credits ' + per + '">' + PRO.map((t) => {
+      const isCur = t === curT, isBest = !custom && pick && t === pick.t;
+      return '<span role="listitem" class="tier' + (isCur ? ' cur' : '') + (isBest ? ' rec' : '') + (!isCur && !isBest && (t.c < curT.c || t.c < perMonth) ? ' below' : '') + '">' + kfmt(t.c * mult) +
+        (isBest ? '<small>' + (pick.cyc !== S.pcyc ? 'Best annually' : 'Recommended') + '</small>' : isCur ? '<small>Current</small>' : '') + '</span>';
+    }).join('') + '<span role="listitem" class="tier' + (custom ? ' rec' : '') + '">Custom' + (custom ? '<small>Best fit</small>' : '') + '</span></div>';
+    let planBody;
+    if (S.fnew) {
+      planBody = '<p>We\'ll compare your plan with your sending after 14 days of history.</p>';
+    } else {
+      const cap = curT.c * mult;
+      const inPlan = Math.min(need, cap);
+      let msg = '<p>You\'re on pace to use <b>≈ ' + kfmt(need) + ' credits ' + per + '</b>';
+      if (custom) msg += ', more than the largest Pro plan. A <b>Custom</b> plan fits high-volume sending.';
+      else {
+        msg += now.extra ? '. Your plan includes ' + kfmt(cap) + ', so you\'d buy <b>≈ ' + kfmt(now.extra * mult) + ' extra credits</b> for ≈ ' + usd(Math.round(now.extraCost * mult)) + ', <b>≈ ' + usd(Math.round(now.total * mult)) + ' ' + per + '</b> in total.' : ', and your plan covers it.';
+        if (!pick) msg += ' None of the bigger plans would cost less for this forecast.';
+        else if (pick) msg += ' <b>' + planName(pick.t, pick.cyc) + '</b> covers it for <b>≈ ' + usd(Math.round(pick.total * mult)) + ' ' + per + '</b>' +
+          (pick.extra ? ' with extra credits' : '') + ', saving ≈ ' + usd(Math.round((now.total - pick.total) * mult)) + ' ' + per + '.';
+      }
+      msg += '</p>';
+      planBody = '<div class="pbar" role="img" aria-label="Forecast ' + kfmt(need) + ' credits ' + per + ', plan includes ' + kfmt(cap) + '"><span style="width:' + (inPlan / Math.max(need, cap) * 100).toFixed(1) + '%"></span>' +
+          (need > cap ? '<span class="over" style="width:' + ((need - cap) / need * 100).toFixed(1) + '%"></span>' : '') + '</div>' +
+        '<div class="pleg"><span><i style="background:var(--blue1)"></i>Plan credits ' + kfmt(inPlan) +
+          ptip('Credits included in your ' + planName(curT, FC.plan.cycle) + ' plan. They\'re already paid for with your subscription.') + '</span>' +
+          (need > cap ? '<span><i style="background:var(--warn1)"></i>Credits to buy ' + kfmt(need - cap) +
+            ptip('Credits your forecast needs on top of your plan, at ' + cents(curT.x) + ' each on your plan. Bigger plans include more credits and charge less for extra ones.') + '</span>' : '') + '</div>' +
+        msg + tiers +
+        '<div class="acts">' + (custom ? '<a class="btn-sb" href="#" data-dead>Talk to sales</a>'
+          : (pick ? '<button type="button" class="btn-sb" data-act="paysel" data-c="' + pick.t.c + '" data-cyc="' + pick.cyc + '">Switch to ' + planName(pick.t, pick.cyc) + '</button>' : '') +
+            '<button type="button" class="' + (pick ? 'plink' : 'btn-sb') + '" data-act="mopen">Compare plans</button>') + '</div>' +
+        (!custom ? '<p class="muted pnote">Sending more than ' + kfmt(top.c * mult) + ' credits ' + per + '? <a href="#" data-dead>Custom plans</a> are built for high volume.</p>' : '');
+    }
+    const plan = '<section class="plan"><div class="phead"><div class="glab">Your plan<span class="muted">' + planName(curT, FC.plan.cycle) + ' · ' + usd(FC.plan.cycle === 'annual' ? curT.a : curT.m) + (FC.plan.cycle === 'annual' ? ' a year' : ' a month') + '</span></div>' +
+      (S.fnew ? '' : cycleSw) + '</div>' + planBody + '</section>';
+
+    // Forecast by source
+    const shown = FSER.filter((s) => s.id !== 'usual' || (S.fbc === 'usual' && !S.fnew));
+    const conf = (sp) => sp <= 0.1 ? ['hi', 'High'] : sp <= 0.25 ? ['md', 'Medium'] : ['lo', 'Low'];
+    const srcRows = shown.map((s) => {
+      const t = cur[s.id];
+      const fl = FC.flows.find((x) => x.id === s.id);
+      const waiting = S.fnew && fl;
+      let basis;
+      if (s.id === 'bc') basis = sched.length ? sched.length + ' scheduled · ' + fmt(sched.reduce((a, b) => a + b.n, 0)) + ' recipients' : 'Nothing scheduled in this period';
+      else if (s.id === 'usual') basis = '~' + FC.usualPerWeek + ' a week, in weeks with nothing scheduled';
+      else if (waiting) basis = 'Needs 14 days of sending · from ' + fmtS(readyOn);
+      else basis = fl.basis + ' · ' + sgnPct(fl.trend * BASIS[S.fb].trend) + '/mo';
+      const sp = fSpread(s.id);
+      const c = conf(sp);
+      const dash = '<span class="muted">—</span>';
+      return '<tr class="hov"><td><span style="display:inline-flex;align-items:center;gap:8px;font-weight:500">' + swatch(s) + esc(s.label) + '</span></td>' +
+        '<td class="muted">' + esc(basis) + '</td>' +
+        '<td>' + (waiting ? dash : '<span class="pill ' + c[0] + ' hint" title="Likely within ±' + Math.round(sp * 100) + '%">' + c[1] + '</span>') + '</td>' +
+        '<td>' + (waiting ? dash : revTracked ? '<b style="font-weight:500">' + fv('revenue', fMet(t, 'revenue')) + '</b>' : '<span class="muted">Not tracked</span>') + '</td>' +
+        ['engagements', 'messages', 'credits'].map((m) => '<td' + (m === 'credits' ? ' class="muted"' : '') + '>' + (waiting ? dash : fmt(fMet(t, m))) + '</td>').join('') + '</tr>';
+    }).join('') +
+      '<tr class="tot"><td>Total</td><td></td><td></td><td>' + (revTracked ? fv('revenue', T.revenue.f.v) : '') + '</td>' +
+      ['engagements', 'messages', 'credits'].map((m) => '<td>' + fmt(T[m].f.v) + '</td>').join('') + '</tr>';
+    const srcHead = [
+      { t: 'Source', w: '20%' }, { t: 'Based on' },
+      { t: '<span class="hint" title="How close the result is likely to be. Known recipients are High; event-based sending varies more.">Confidence</span>' },
+      { t: 'Revenue' }, { t: 'Engagements' }, { t: 'Messages' }, { t: 'Credits' }
+    ];
+    const srcTable = '<div class="tbl"><table style="min-width:960px"><thead><tr>' + srcHead.map((x) => '<th scope="col"' + (x.w ? ' style="width:' + x.w + '"' : '') + '>' + x.t + '</th>').join('') + '</tr></thead><tbody>' + srcRows + '</tbody></table></div>';
+
+    // Scheduled broadcasts
+    const bcTable = sched.length
+      ? table([{ t: 'Broadcast', w: '26%' }, { t: 'Send date' }, { t: 'Channel' }, { t: 'Recipients' }, { t: 'Est. revenue' }, { t: 'Est. engagements' }, { t: 'Est. credits' }],
+        sched.map((b) => [
+          '<a class="chl" href="#" data-dead>' + esc(b.name) + '</a>',
+          WDS[b.date.getDay()] + ', ' + fmtS(b.date),
+          CH_LABEL[b.ch],
+          fmt(b.n),
+          b.ch === 'sms' ? '<b style="font-weight:500">' + fv('revenue', b.n * FC.eng.sms * FC.revPerClick) + '</b>' : '<span class="muted">Not tracked</span>',
+          fmt(b.n * FC.eng[b.ch]) + ' <span class="muted">' + CH_UNIT[b.ch] + '</span>',
+          '<span class="muted">' + fmt(b.n * FC.credit[b.ch]) + '</span>'
+        ]), 820)
+      : emptyBox('No broadcasts scheduled in the next ' + h + ' days', 'Broadcasts you schedule are added to the forecast automatically.');
+
+    // Breakdown lists
+    const chList = CHS.filter((c) => S.svc === 'all' || c === S.svc).map((c) => {
+      const n = FSER.reduce((a, s) => a + cur[s.id][c] * FC.credit[c], 0);
+      return { label: CH_LABEL[c], n, pct: credAll ? (n / credAll * 100).toFixed(1) + '%' : '0%' };
+    });
+    const engAll = FSER.reduce((a, s) => a + fMet(cur[s.id], 'engagements'), 0);
+    const engList = CHS.filter((c) => S.svc === 'all' || c === S.svc).map((c) => {
+      const n = FSER.reduce((a, s) => a + cur[s.id][c] * FC.eng[c], 0);
+      return { label: CH_LABEL[c], n, pct: engAll ? (n / engAll * 100).toFixed(1) + '%' : '0%' };
+    });
+    const drivers = S.fnew
+      ? '<section class="blist"><h3 class="h3">Campaigns &amp; triggers</h3>' + emptyBox('Not enough history yet', 'Campaign and trigger forecasts start on ' + fmtS(readyOn) + '.') + '</section>'
+      : barList('Campaigns & triggers: expected engagements and monthly trend', FC.flows.filter((f) => f.items).flatMap((f) => f.items.map((it) => ({
+        label: it[0], n: fMet(cur[f.id], 'engagements') * it[1], pct: sgnPct(f.trend * BASIS[S.fb].trend)
+      }))).sort((a, b) => b.n - a.n), 170);
+
+    const B = BASIS[S.fb];
+    const how = '<section class="how"><button type="button" data-act="how" aria-expanded="' + S.how + '" aria-controls="how-body">How this forecast works' + IC.chev + '</button>' +
+      (S.how ? '<dl id="how-body">' +
+        '<dt>Scheduled broadcasts</dt><dd>Counted at their recipient count on the send date. Only delivery can vary.</dd>' +
+        '<dt>Campaigns, triggers, other</dt><dd>Your daily average for the last ' + bas + ' days, extended with its trend (' + FC.flows.map((f) => ({ camp: 'campaigns', trig: 'triggers', other: 'other' })[f.id] + ' ' + sgnPct(f.trend * B.trend)).join(', ') + ' a month) and your usual weekday pattern. A shorter basis follows recent changes faster but is less steady.</dd>' +
+        '<dt>Usual broadcasts</dt><dd>Optional. Adds your typical broadcast volume (~' + FC.usualPerWeek + ' messages a week) to weeks with nothing scheduled. Turn it on if you send broadcasts regularly but schedule them late.</dd>' +
+        '<dt>Credits</dt><dd>Your current average per channel: SMS ' + FC.credit.sms + ' per message (includes MMS and long messages), Voice ' + FC.credit.voice + ' per call, Ringless ' + FC.credit.ringless + ' per drop.</dd>' +
+        '<dt>Engagements</dt><dd>Your recent rates: SMS ' + (FC.eng.sms * 100).toFixed(1) + '% of sent clicked, Voice ' + (FC.eng.voice * 100).toFixed(1) + '% of calls transferred, Ringless ' + (FC.eng.ringless * 100).toFixed(1) + '% of drops called back.</dd>' +
+        '<dt>Revenue</dt><dd>' + money(FC.revPerClick) + ' per SMS click, your average from conversion tracking. Voice and Ringless revenue isn\'t tracked.</dd>' +
+        '<dt>Comparisons</dt><dd>Each "vs" figure compares the forecast with your average pace over the last ' + bas + ' days, scaled to the same number of days. A week with no broadcast scheduled can look lower than average.</dd>' +
+        '<dt>Return on credits</dt><dd>Expected revenue (or engagements, when revenue isn\'t tracked) for every 100 credits used.</dd>' +
+        '<dt>Growth trends</dt><dd>Calendar months. The current month is actual to date plus forecast for the rest. Future months include your usual broadcasts, so months with nothing scheduled yet don\'t look like a drop. Engagement rates have improved ~' + (FC.engTrend * 100).toFixed(1) + '% a month, and the forecast assumes that continues.</dd>' +
+        '<dt>Likely range</dt><dd>Where the result should land about 8 times out of 10. It\'s narrow for scheduled broadcasts and wider for triggers, longer periods and a shorter basis.</dd>' +
+        '</dl>' : '') + '</section>';
+
+    return '<div style="display:flex;flex-direction:column;gap:20px"><h1>Analytics</h1>' + tabs('forecast') + '</div>' +
+      '<div class="filters">' +
+      dropdown('fh', { icon: 'cal', groups: [{ title: '', options: [{ id: '7', label: 'Next 7 days' }, { id: '30', label: 'Next 30 days' }, { id: '90', label: 'Next 90 days' }] }], value: S.fh, width: 180, onSet: (v) => { S.fh = v; } }) +
+      dropdown('fb', { icon: 'trend', groups: [{ title: '', options: [{ id: '30', label: 'Based on last 30 days' }, { id: '90', label: 'Based on last 90 days' }, { id: '180', label: 'Based on last 180 days' }] }], value: S.fb, width: 230, onSet: (v) => { S.fb = v; } }) +
+      dropdown('svc', { icon: 'filter', label: 'All services', groups: SERVICES, value: S.svc, onSet: (v) => { S.svc = v; } }) +
+      dropdown('fbc', { icon: 'bcast', groups: [{ title: '', options: [{ id: 'sched', label: 'Scheduled broadcasts only' }, { id: 'usual', label: 'Scheduled + usual broadcasts' }] }], value: S.fbc, width: 260, onSet: (v) => { S.fbc = v; } }) +
+      '</div>' +
+      '<p class="fnote">' + IC.info + '<span>' + note + '</span></p>' +
+      alert + stats(st) + highlights +
+      '<section class="sec"><div class="sec-h"><h2 class="h3">How you’re growing</h2><p>By month, last 12 months and the next 3 · hover a point for its value</p></div>' + growth + '</section>' +
+      '<section class="sec"><h2 class="h3">Expected value by source</h2>' + srcTable + '</section>' +
+      '<section class="sec"><h2 class="h3">Scheduled broadcasts in this period</h2>' + bcTable + '</section>' +
+      '<div class="two">' + drivers + barList('Engagements by channel', engList, 100) + '</div>' +
+      '<section class="sec divsec"><div class="sec-h"><h2 class="h3">Credits &amp; plan</h2><p>What this sending will cost</p></div>' +
+      stats([
+        { label: 'Credits', value: '≈ ' + fmt(T.credits.f.v), sub: [range('credits'), delta('credits', false)], tip: 'Credits all forecast sending will use in this period, at your current rates per channel.' },
+        { label: 'Credit balance', value: fmt(FC.balance), sub: balSub, tip: 'Runout date assumes all channels keep sending at the forecast pace.' }
+      ]) + fChart(h) +
+      '<div class="two">' + plan + barList('Credits by channel', chList, 100) + '</div></section>' + how;
+  }
+
+  /* ---------- plan modals ---------- */
+  const XBTN = '<button type="button" class="xbtn" data-act="mclose" aria-label="Close"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button>';
+  const cycSw = (act, val) => '<div class="segc" role="group" aria-label="Billing cycle">' +
+    [['monthly', 'Monthly'], ['annual', 'Annually']].map((c) => '<button type="button" data-act="' + act + '" data-v="' + c[0] + '" aria-pressed="' + (val === c[0]) + '">' + c[1] + '</button>').join('') + '</div>';
+
+  function compareModal() {
+    const cyc = S.mcyc, yr = cyc === 'annual';
+    const pm = S.perMonth;
+    const cur = proTier(FC.plan.credits);
+    const now = planCost(cur, FC.plan.cycle, pm);
+    const ups = upgrades(pm, [cyc]);
+    const opts = (cyc === FC.plan.cycle ? [now] : []).concat(ups);
+    const cand = ups.length ? cheapest(ups) : null;
+    const best = pm > PRO[PRO.length - 1].c || !cand || cand.total >= now.total - 1 ? null : cand;
+    const rows = opts.map((o) => {
+      const t = o.t, isCur = t === cur && cyc === FC.plan.cycle, isBest = best && o === best;
+      return '<tr class="hov' + (isBest ? ' bestrow' : '') + '">' +
+        '<td><span style="font-weight:500">' + kfmt(t.c * (yr ? 12 : 1)) + '</span>' +
+          (isCur ? ' <span class="pill gr">Current</span>' : '') + (isBest ? ' <span class="pill hi">Best value</span>' : '') + '</td>' +
+        '<td>' + (yr ? usd(t.a) + ' <span class="muted">/ yr</span>' : usd(t.m) + ' <span class="muted">/ mo</span>') + '</td>' +
+        '<td>' + cents((yr ? t.a : t.m) / (t.c * (yr ? 12 : 1))) + '</td>' +
+        '<td>' + cents(t.x) + '</td>' +
+        '<td>' + (o.extra ? kfmt(o.extra) + ' <span class="muted">· ' + usd(Math.round(o.extraCost)) + '</span>' : '<span class="muted">—</span>') + '</td>' +
+        '<td><b style="font-weight:600">≈ ' + usd(Math.round(o.total)) + '</b>' + (isCur || o.total >= now.total - 1 ? '' : ' <span class="save">Save ' + usd(Math.round(now.total - o.total)) + '</span>') + '</td>' +
+        '<td style="text-align:right">' + (isCur ? '<span class="muted">Your plan</span>' : '<button type="button" class="btn-sb" style="margin:0" data-act="paysel" data-c="' + t.c + '" data-cyc="' + cyc + '">Select</button>') + '</td></tr>';
+    }).join('');
+    const head = [yr ? 'Credits a year' : 'Credits a month', 'Price', '<span class="hint" title="Plan price ÷ credits included">Per plan credit</span>', '<span class="hint" title="What each credit beyond the plan costs">Per extra credit</span>',
+      '<span class="hint" title="Credits your forecast needs on top of the plan, a month, and what they cost">Credits to buy / mo</span>', '<span class="hint" title="Plan price (annual ÷ 12) + credits to buy">Est. cost / month</span>', '<span class="sr">Action</span>'];
+    return '<div class="ovl" data-act="mclose"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlg-t" tabindex="-1" data-act="noop">' +
+      '<div class="dtop"><h2 id="dlg-t">Compare plans</h2>' + XBTN + '</div>' +
+      '<p class="dsub">What your forecast of <b>≈ ' + kfmt(pm) + ' credits a month</b> would cost on each Pro plan. Today you pay <b>≈ ' + usd(Math.round(now.total)) + ' a month</b> on ' + planName(cur, FC.plan.cycle) +
+        (now.extra ? ', including extra credits' : '') + '. Bigger plans charge less per credit, both included and extra.</p>' +
+      cycSw('mcyc', cyc) +
+      '<div class="tbl"><table style="min-width:720px"><thead><tr>' + head.map((x) => '<th scope="col">' + x + '</th>').join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="muted pnote" style="margin:0">Need more than ' + kfmt(PRO[PRO.length - 1].c) + ' credits a month? <a href="#" data-dead>Talk to sales</a> about a Custom plan. Prices exclude taxes.</p></div></div>';
+  }
+
+  function payModal() {
+    const t = proTier(S.pay.c), cyc = S.pay.cyc, yr = cyc === 'annual';
+    const name = planName(t, cyc);
+    const save = t.m * 12 - t.a;
+    const opt = (v, label, extra, price) => '<label class="ropt" data-act="paycyc" data-v="' + v + '"><input type="radio" name="bill"' + (cyc === v ? ' checked' : '') + '><span>' + label + '</span>' + extra + '<b>' + price + '</b><span class="muted">/ month</span></label>';
+    return '<div class="ovl" data-act="mclose"><div class="dlg pay" role="dialog" aria-modal="true" aria-labelledby="dlg-t" tabindex="-1" data-act="noop">' +
+      '<div class="dtop"><h2 id="dlg-t">Upgrade plan</h2><div class="steps"><button type="button" class="n" data-act="mback" aria-label="Step 1: choose a plan">1</button><span class="n" aria-current="step">2</span>Payment</div>' + XBTN + '</div>' +
+      '<div class="paygrid"><div>' +
+        '<span class="flab">Billing</span>' +
+        opt('monthly', 'Monthly', '', usd(t.m)) +
+        opt('annual', 'Annually', '<span class="save">Save ' + usd(save) + '</span>', usd(t.a / 12)) +
+        '<span class="flab" style="margin-top:24px">Card</span>' +
+        '<div class="cardsel"><span class="visa">VISA</span><span style="flex:1">Visa ... 1111</span><span class="pill gr">Primary</span><span class="muted">Exp 11/55</span>' + IC.chev + '</div>' +
+      '</div><aside class="dpanel" aria-label="Details"><b class="dt">Details</b>' +
+        '<div class="r"><span>Plan</span><b>' + name + '</b></div>' +
+        '<div class="r"><span>Credits</span><b>' + fmt(t.c * (yr ? 12 : 1)) + '</b></div>' +
+        '<div class="r"><span>Additional credit</span><b>' + cents(t.x) + '</b></div><hr>' +
+        '<div class="r tot"><span>Total</span><b>' + usd(yr ? t.a : t.m) + '</b></div><small class="muted">+ applicable taxes' + (yr ? '' : ' · billed monthly') + '</small>' +
+      '</aside></div>' +
+      '<div class="dact"><button type="button" class="btn primary" data-act="payok">Upgrade to ' + name + '</button><button type="button" class="btn secondary" data-act="mback">Back</button></div>' +
+      '</div></div>';
+  }
+
   /* ---------- render ---------- */
   const root = document.getElementById('root');
   function render() {
     DD = {};
-    const body = { messages: pageMessages, credits: pageCredits, sms: pageSMS, voice: pageVoice, ringless: pageRingless }[S.page]();
-    const isDetail = ['sms', 'voice', 'ringless'].includes(S.page);
-    const titles = { messages: 'Analytics — Messages', credits: 'Analytics — Credit Usage', sms: 'Analytics — SMS', voice: 'Analytics — Voice', ringless: 'Analytics — Ringless' };
+    const body = { messages: pageMessages, credits: pageCredits, forecast: pageForecast, sms: pageSMS, voice: pageVoice, ringless: pageRingless }[S.page]();
+    const titles = { messages: 'Analytics — Messages', credits: 'Analytics — Credit Usage', forecast: 'Analytics — Forecast', sms: 'Analytics — SMS', voice: 'Analytics — Voice', ringless: 'Analytics — Ringless' };
     document.title = titles[S.page] + ' · Call Loop prototype';
+    const proto = S.page === 'forecast'
+      ? '<span>Account history:</span>' +
+        '<button type="button" data-act="fnew" data-v="0" aria-pressed="' + !S.fnew + '">90+ days</button>' +
+        '<button type="button" data-act="fnew" data-v="1" aria-pressed="' + S.fnew + '">New account (' + FC.newDays + ' days)</button>'
+      : '<span>Prototype data:</span>' +
+        '<button type="button" data-act="variant" data-v="0" aria-pressed="' + !S.empty + '">With interactions</button>' +
+        '<button type="button" data-act="variant" data-v="1" aria-pressed="' + S.empty + '">No interactions yet</button>';
     root.innerHTML = '<div class="app">' + sidebar() + '<main class="main"><div class="wrap">' + body + '</div></main></div>' +
-      '<div class="proto" role="group" aria-label="Prototype data">' +
-      '<span>' + (isDetail ? 'Detail page data:' : 'Detail pages data:') + '</span>' +
-      '<button type="button" data-act="variant" data-v="0" aria-pressed="' + !S.empty + '">With interactions</button>' +
-      '<button type="button" data-act="variant" data-v="1" aria-pressed="' + S.empty + '">No interactions yet</button></div>';
+      // Credit Usage has no interaction data, so the switch would do nothing there
+      (S.page === 'credits' ? '' : '<div class="proto" role="group" aria-label="Prototype data">' + proto + '</div>') +
+      (S.page === 'forecast' && S.modal === 'compare' ? compareModal() : '') +
+      (S.page === 'forecast' && S.modal === 'pay' ? payModal() : '') +
+      (S.toast ? '<div class="toast" role="status">' + esc(S.toast) + '</div>' : '');
+    document.body.style.overflow = S.modal ? 'hidden' : '';
+    const dlg = document.querySelector('.dlg');
+    if (dlg) dlg.focus({ preventScroll: true });
     if (S.open && document.getElementById('q-' + S.open)) {
       const el = document.getElementById('q-' + S.open);
       el.focus();
@@ -831,6 +1605,38 @@ tr:hover .eye,.eye:focus{opacity:1}
       }
     } else if (act === 'variant') {
       S.empty = t.dataset.v === '1';
+    } else if (act === 'fnew') {
+      S.fnew = t.dataset.v === '1';
+    } else if (act === 'pcyc') {
+      S.pcyc = t.dataset.v;
+    } else if (act === 'noop') {
+      return;
+    } else if (act === 'mopen') {
+      S.modal = 'compare';
+      S.mcyc = S.pcyc;
+    } else if (act === 'mclose') {
+      if (t.classList.contains('ovl') && e.target !== t) return; // clicks inside the dialog bubble to the overlay
+      S.modal = null;
+    } else if (act === 'mcyc') {
+      S.mcyc = t.dataset.v;
+    } else if (act === 'paysel') {
+      S.pay = { c: +t.dataset.c, cyc: t.dataset.cyc };
+      S.modal = 'pay';
+    } else if (act === 'paycyc') {
+      if (S.pay.cyc === t.dataset.v) return;
+      S.pay.cyc = t.dataset.v;
+    } else if (act === 'mback') {
+      S.modal = 'compare';
+      S.mcyc = S.pay.cyc;
+    } else if (act === 'payok') {
+      const tier = proTier(S.pay.c);
+      FC.plan = { line: 'Pro', cycle: S.pay.cyc, credits: tier.c };
+      S.pcyc = S.pay.cyc;
+      S.toast = 'You\'re now on ' + planName(tier, S.pay.cyc) + '.';
+      S.modal = null;
+      setTimeout(() => { S.toast = ''; render(); }, 3500);
+    } else if (act === 'how') {
+      S.how = !S.how;
     }
     render();
   });
@@ -843,6 +1649,11 @@ tr:hover .eye,.eye:focus{opacity:1}
   });
 
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && S.modal && !S.open) {
+      S.modal = null;
+      render();
+      return;
+    }
     if (e.key === 'Escape' && S.open) {
       const id = S.open;
       closePop();

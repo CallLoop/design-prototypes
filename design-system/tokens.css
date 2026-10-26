@@ -1,0 +1,38 @@
+:root{
+  /* Call Loop design system — synced from Figma "00 Design System" (BOVX8Hmx1HfwwBeDwOcZQL), 2026-10-19. Source of truth: design-system/tokens.css */
+  /* Primary */
+  --blue1:#1364F9;--blue2:#1854EA;--blue3:#1885EA;--blue4:#1362AC;--blue5:#E7EFFE;--blue6:#D0E0FE;
+  --blue1-dis:rgba(19,100,249,.4);--blue3-dis:rgba(24,133,234,.4);
+  --black:#14161A;--white:#FFFFFF;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;
+  --g2-dis:rgba(183,191,200,.45);--g2-light:rgba(183,191,200,.3);
+  --text:#2C2D2E; /* not a Figma style — kept for existing prototype usage */
+  /* Secondary */
+  --purple1:#7A16F5;--purple2:#C6AFE2;--purple3:#F0E4FF;--aqua1:#A4C5DB;--aqua2:#E4F4FF;
+  --orange1:#F86919;--orange2:#D6BAAA;--orange3:#FFEEE4;
+  /* States */
+  --ok:#05944F;--ok2:#026233;--ok3:#E7F6ED;--notify1:#2E9AE4;--notify2:#E6F7FF;
+  --warn1:#FFC043;--warn2:#BA7D04;--warn3:#855A04;--warn4:#FFF8E9;--err:#E11900;--err2:#A11200;--err3:#FFF1F0;
+  /* Gradients */
+  --grad1:linear-gradient(180deg,#F3F5F8 0%,#EEF5FF 100%);--grad2:linear-gradient(270deg,#F3F5F8 60%,rgba(243,245,248,.8) 100%);--grad3:#E7EFFE;
+  /* Effects */
+  --shadow1:0 0 2px rgba(83,102,137,.2),0 12px 16px rgba(83,102,137,.08),0 10px 40px rgba(83,102,137,.08);
+  --shadow2:0 4px 8px -2px rgba(27,46,94,.04);
+  --shadow3:0 0 2px rgba(83,102,137,.2),0 10px 20px rgba(83,102,137,.05),0 30px 50px rgba(83,102,137,.1);
+  /* Shape */
+  --r-xs:4px;--r:8px;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+/* Typography — Figma text styles (Inter). Letter-spacing -2% on headings. */
+.t-h1{font:600 40px/48px var(--font);letter-spacing:-.02em}
+.t-h2{font:400 28px/32px var(--font);letter-spacing:-.02em}.t-h2-sb{font-weight:600}
+.t-h3{font:400 20px/24px var(--font);letter-spacing:-.02em}.t-h3-sb{font-weight:600}
+.t-quote{font:italic 400 20px/28px var(--font)}
+.t-p0{font:400 16px/24px var(--font)}   /* P0: Italic / Regular / Semi Bold / Bold */
+.t-p1{font:400 16px/20px var(--font)}   /* P1: Regular / Medium / Semi Bold */
+.t-p2{font:400 14px/20px var(--font)}   /* P2: Regular / Medium / Semi Bold */
+.t-s1{font:400 14px/16px var(--font)}   /* S1: Regular / Medium / Semi Bold */
+.t-s2{font:400 12px/16px var(--font)}   /* S2: Regular / Medium / Semi Bold */
+.t-s3{font:400 12px/18px var(--font)}   /* S3: Regular / Medium */
+.t-s4{font:500 10px/12px var(--font)}   /* S4: Medium */
+.w-r{font-weight:400}.w-m{font-weight:500}.w-sb{font-weight:600}.w-b{font-weight:700}.i{font-style:italic}
