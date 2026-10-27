@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call Loop — Twilio integration prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Call Loop design system — synced from Figma "00 Design System" (BOVX8Hmx1HfwwBeDwOcZQL), 2026-10-19. Source of truth: design-system/tokens.css */
+  /* Primary */
+  --blue1:#1364F9;--blue2:#1854EA;--blue3:#1885EA;--blue4:#1362AC;--blue5:#E7EFFE;--blue6:#D0E0FE;
+  --blue1-dis:rgba(19,100,249,.4);--blue3-dis:rgba(24,133,234,.4);
+  --black:#14161A;--white:#FFFFFF;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;
+  --g2-dis:rgba(183,191,200,.45);--g2-light:rgba(183,191,200,.3);
+  --text:#2C2D2E; /* not a Figma style — kept for existing prototype usage */
+  /* Secondary */
+  --purple1:#7A16F5;--purple2:#C6AFE2;--purple3:#F0E4FF;--aqua1:#A4C5DB;--aqua2:#E4F4FF;
+  --orange1:#F86919;--orange2:#D6BAAA;--orange3:#FFEEE4;
+  /* States */
+  --ok:#05944F;--ok2:#026233;--ok3:#E7F6ED;--notify1:#2E9AE4;--notify2:#E6F7FF;
+  --warn1:#FFC043;--warn2:#BA7D04;--warn3:#855A04;--warn4:#FFF8E9;--err:#E11900;--err2:#A11200;--err3:#FFF1F0;
+  /* Gradients */
+  --grad1:linear-gradient(180deg,#F3F5F8 0%,#EEF5FF 100%);--grad2:linear-gradient(270deg,#F3F5F8 60%,rgba(243,245,248,.8) 100%);--grad3:#E7EFFE;
+  /* Effects */
+  --shadow1:0 0 2px rgba(83,102,137,.2),0 12px 16px rgba(83,102,137,.08),0 10px 40px rgba(83,102,137,.08);
+  --shadow2:0 4px 8px -2px rgba(27,46,94,.04);
+  --shadow3:0 0 2px rgba(83,102,137,.2),0 10px 20px rgba(83,102,137,.05),0 30px 50px rgba(83,102,137,.1);
+  /* Shape */
+  --r-xs:4px;--r:8px;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--black);background:#fff;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--blue1)}a:hover{color:var(--blue2)}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--blue1);outline-offset:1px}
+.app{display:flex;flex-wrap:wrap;min-height:100vh}
+
+/* Sidebar */
+.side{width:240px;flex:none;height:100vh;position:sticky;top:0;overflow:auto;padding:16px 12px;box-shadow:inset -1px 0 0 var(--g3);display:flex;flex-direction:column;justify-content:space-between;gap:24px;background:#fff}
+.shead{height:44px;padding:0 8px 0 12px;border-radius:12px;background:var(--g4);display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600}
+.sclose{width:28px;height:28px;padding:0;border:0;border-radius:8px;background:var(--blue1);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.divider{height:1px;background:var(--g3);margin:8px 4px}
+.nav{height:36px;padding:0 12px;display:flex;align-items:center;gap:12px;border-radius:8px;color:var(--black);text-decoration:none;font-size:14px;line-height:16px}
+.nav:hover{background:var(--g4);color:var(--black)}
+.nav svg{stroke:var(--text);flex:none}
+.nav.on{background:var(--aqua2);font-weight:500}.nav.on svg{stroke:var(--blue1)}
+.plan{margin-top:12px;padding:12px;border-radius:12px;background:var(--g4);display:flex;flex-direction:column;gap:10px}
+.plan .row{display:flex;justify-content:space-between;align-items:center;font-size:11px;line-height:14px}
+.plan a{text-decoration:none;font-weight:600}
+.prog{height:6px;border-radius:3px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);overflow:hidden}.prog i{display:block;height:100%;width:79%;background:var(--blue3);border-radius:3px}
+
+/* Main */
+.main{flex:999 1 560px;min-width:0;padding:40px 48px 96px}
+.wrap{max-width:1120px;display:flex;flex-direction:column;gap:32px}
+h1{margin:0;font-size:40px;line-height:48px;letter-spacing:-.8px;font-weight:600}
+.h2{margin:0;font-size:17px;line-height:24px;font-weight:600}
+.muted{color:var(--g1)}
+.btn{height:40px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;font-size:14px;line-height:16px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn.sm{height:36px}
+.btn.primary{background:var(--blue1);color:#fff}.btn.primary:hover{background:var(--blue2)}
+.btn.primary:disabled{background:rgba(19,100,249,.4);cursor:not-allowed}
+.btn.secondary{background:rgba(183,191,200,.3);color:var(--black)}.btn.secondary:hover{background:var(--g3)}
+.btn.blue{background:var(--blue5);color:var(--blue1)}.btn.blue:hover{background:var(--blue6)}
+.btn.danger{background:var(--err);color:#fff}.btn.danger:hover{background:var(--err2)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:12px}
+.search input{width:240px;height:40px;padding:8px 12px 8px 36px;border:0;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);font-size:14px;outline:none}
+input:focus,select:focus{box-shadow:inset 0 0 0 1px var(--blue1),0 0 0 3px var(--blue6)!important;outline:none}
+
+/* Cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.card{position:relative;min-height:224px;padding:12px 16px 16px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);display:flex;flex-direction:column;align-items:center;gap:12px}
+.card:hover{box-shadow:inset 0 0 0 1px var(--g2)}
+.ctop{align-self:stretch;height:28px;display:flex;justify-content:space-between;align-items:center}
+.native{padding:2px 8px;border-radius:6px;background:var(--purple3);color:var(--purple1);font-size:12px;line-height:16px}
+.more{width:28px;height:28px;padding:0;border:0;border-radius:8px;background:var(--g4);color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.more:hover{background:var(--g3);color:var(--black)}
+.logo{width:72px;height:72px;border-radius:22px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;justify-content:center;font-size:20px;line-height:24px;font-weight:600;letter-spacing:-.4px}
+.cname{font-size:15px;line-height:20px;text-align:center}
+.cact{margin-top:auto;align-self:stretch;display:flex;gap:12px}
+.cact .btn{height:36px}
+.cact .grow{flex:1}
+.pill{flex:1;min-width:0;height:36px;padding:0 12px;border:0;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;line-height:16px}
+.pill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill.ok{background:var(--ok3);color:var(--ok2)}
+button.pill{cursor:pointer}button.pill:hover{filter:brightness(.97)}
+.explore{flex:1;height:36px;padding:0 12px;border:0;border-radius:8px;background:var(--blue5);color:var(--blue1);display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;cursor:pointer}
+.explore:hover{background:var(--blue6)}
+.menu{position:absolute;top:44px;right:12px;z-index:31;width:212px;padding:8px;background:#fff;border-radius:8px;box-shadow:var(--shadow1);display:flex;flex-direction:column;gap:2px}
+.mi{height:32px;padding:0 8px;border:0;border-radius:6px;background:transparent;font-size:14px;text-align:left;cursor:pointer}
+.mi:hover{background:var(--g4)}
+
+/* Detail */
+.crumb{padding-left:28px;font-size:13px;line-height:16px;color:var(--black);text-decoration:none;align-self:flex-start}
+.crumb:hover{color:var(--blue3)}
+.back{width:20px;height:20px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.back:hover{color:var(--black)}
+.status{padding-left:28px;display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px}
+.tabs{display:flex;gap:8px;box-shadow:inset 0 -1px 0 var(--g3)}
+.tab{padding:0 8px 10px;border:0;background:transparent;font-size:14px;line-height:16px;color:var(--g1);cursor:pointer}
+.tab:hover{color:var(--blue3)}
+.tab[aria-selected="true"]{color:var(--blue1);font-weight:500;box-shadow:inset 0 -2px 0 var(--blue1)}
+.shd{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.shd p{margin:4px 0 0;max-width:640px;font-size:14px;line-height:20px;color:var(--g1)}
+.tbl{overflow-x:auto;padding-bottom:4px}
+table{width:100%;min-width:760px;border-collapse:separate;border-spacing:0;font-size:14px;line-height:16px}
+th{height:40px;padding:0 8px;background:var(--g4);color:var(--g1);font-weight:400;font-size:12px;text-align:left;white-space:nowrap}
+th:first-child{padding-left:16px;border-radius:8px 0 0 8px}
+th:last-child{padding-right:16px;border-radius:0 8px 8px 0;text-align:right}
+td{height:56px;padding:0 8px;border-bottom:1px solid var(--g3)}
+td:first-child{padding-left:16px;font-weight:500}
+td:last-child{padding-right:16px;text-align:right;white-space:nowrap}
+tbody tr:hover td{background:var(--g4)}
+tr.fresh td{background:var(--blue5)}
+.urlbox{max-width:460px;height:36px;padding:0 4px 0 12px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;gap:8px}
+.urlbox span{flex:1;min-width:0;font-family:"Roboto Mono",ui-monospace,monospace;font-size:12px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.copy{height:28px;padding:0 10px;flex:none;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:6px;background:var(--g4);font-size:13px;line-height:16px;font-weight:500;cursor:pointer}
+.copy:hover{background:var(--g3)}
+.copy.done{background:var(--ok3);color:var(--ok2)}
+.inslink{display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:16px;font-weight:500;text-decoration:none;white-space:nowrap}
+.ibtn{width:32px;height:32px;padding:0;border:0;border-radius:8px;background:var(--g4);color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;vertical-align:middle}
+.ibtn:hover{background:var(--g3);color:var(--black)}
+.ibtn.danger:hover{background:var(--err3);color:var(--err)}
+.ibtn + .ibtn{margin-left:8px}
+.empty{padding:32px 24px;border-radius:12px;border:1px dashed var(--g2);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.empty .logo{width:48px;height:48px;border-radius:16px;font-size:15px}
+.empty b{font-size:15px;line-height:20px}
+.empty span{max-width:420px;font-size:14px;line-height:20px;color:var(--g1)}
+
+/* Tooltips */
+.qt{position:relative;display:inline-flex;vertical-align:middle;margin-left:4px;border-radius:50%;cursor:help;outline:none}
+.qt .qb{display:none;position:absolute;top:calc(100% + 8px);z-index:20;width:280px;padding:8px 10px;border-radius:8px;background:rgba(20,22,26,.9);color:#fff;font-size:13px;line-height:18px;font-weight:400;text-align:left;white-space:normal}
+.qt .qb.l{left:-10px}.qt .qb.r{right:-10px}
+.qt:hover .qb,.qt:focus .qb{display:block}
+.qt:focus-visible{box-shadow:0 0 0 2px var(--blue1)}
+
+/* Mappings */
+.mgrid{display:grid;grid-template-columns:244px 244px 32px;column-gap:12px;align-items:center}
+.mhead{font-size:12px;line-height:16px;font-weight:500}
+.sel{position:relative}
+.sel select{width:100%;height:40px;padding:0 36px 0 12px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);appearance:none;-webkit-appearance:none;font-size:14px;cursor:pointer}
+.sel.ic select{padding-left:36px}
+.sel select:disabled{background:var(--g4);color:var(--g1);cursor:default}
+.sel .chev{position:absolute;right:12px;top:12px;pointer-events:none}
+.sel .lead{position:absolute;left:12px;top:12px;pointer-events:none}
+.atag{width:16px;height:16px;border-radius:4px;background:var(--g1);color:#fff;font-size:10px;line-height:16px;font-weight:600;text-align:center}
+.addf{width:500px;max-width:100%;height:36px;border:0;border-radius:8px;background:var(--blue5);color:var(--blue1);display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer}
+.addf:hover{background:var(--blue6)}
+.desc{max-width:680px;display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:20px;color:var(--text)}
+.desc p{margin:0}
+
+/* Modals */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(20,22,26,.2);display:flex;justify-content:center;align-items:flex-start;padding:100px 16px 16px;overflow-y:auto}
+.dialog{width:420px;max-width:100%;padding:24px;background:#fff;border-radius:20px;box-shadow:var(--shadow1);display:flex;flex-direction:column;gap:20px}
+.dhead{display:flex;align-items:center;gap:12px}
+.dhead h2{flex:1;margin:0;font-size:20px;line-height:24px;letter-spacing:-.4px;font-weight:600}
+.mlogo{width:32px;height:32px;flex:none;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.x{width:24px;height:24px;padding:0;border:0;background:transparent;color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.x:hover{color:var(--black)}
+.alert{display:flex;gap:10px;padding:12px;border-radius:12px;font-size:13px;line-height:18px}
+.alert.info{background:var(--notify2);color:var(--blue4)}
+.alert i{flex:none;width:24px;height:24px;border-radius:50%;background:var(--blue3);display:inline-flex;align-items:center;justify-content:center}
+.fields{display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font-size:12px;line-height:16px;font-weight:500;color:var(--g1)}
+.field input{height:40px;padding:8px 12px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);font-size:14px;outline:none}
+.field input:disabled{background:var(--g4);color:var(--g1)}
+.field input.bad{box-shadow:inset 0 0 0 1px var(--err),0 0 0 3px var(--err3)}
+.field .err{font-size:12px;line-height:16px;color:var(--err)}
+.field .help{font-size:12px;line-height:16px;color:var(--g1)}
+.dact{display:flex;gap:12px;margin-top:8px}
+.confirm{width:368px;max-width:100%;padding:16px 16px 24px;background:#fff;border-radius:20px;box-shadow:var(--shadow1);display:flex;flex-direction:column;align-items:center;position:relative}
+.confirm .x{position:absolute;top:16px;right:16px}
+.ctile{width:80px;height:80px;margin:16px 0 24px;border-radius:32px;background:var(--err3);display:flex;align-items:center;justify-content:center}
+.ctile i{width:32px;height:32px;border-radius:12px;background:var(--err);display:flex;align-items:center;justify-content:center}
+.confirm h2{margin:0 0 12px;width:280px;text-align:center;font-size:20px;line-height:24px;letter-spacing:-.4px;font-weight:400}
+.confirm p{margin:0 0 32px;width:280px;text-align:center;font-size:14px;line-height:20px;color:var(--g1)}
+.stack{width:100%;display:flex;flex-direction:column;gap:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;padding:10px 14px;border-radius:10px;background:rgba(20,22,26,.92);color:#fff;display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;white-space:nowrap;box-shadow:var(--shadow1)}
+
+/* Prototype switch */
+.proto{position:fixed;right:16px;top:8px;z-index:55;display:flex;align-items:center;gap:4px;padding:2px 2px 2px 10px;border-radius:10px;background:rgba(20,22,26,.92);color:#fff;font-size:12px;line-height:16px;box-shadow:var(--shadow1)}
+.proto span{margin-right:4px;color:#B7BFC8}
+.proto button{min-width:24px;height:24px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer}
+.proto button[aria-pressed="true"]{background:#fff;color:var(--black);font-weight:600}
+
+/* Twilio prototype */
+.logo.tw,.mlogo.tw{color:#F22F46}
+.pill.ok b{font-weight:500}
+.chip{padding:2px 8px;border-radius:6px;font-size:12px;line-height:16px;white-space:nowrap}
+.chip.ext{background:var(--purple3);color:var(--purple1)}
+.st{display:inline-flex;align-items:center;gap:6px}
+.st.ok{color:var(--ok)}.st.warn{color:var(--warn2)}
+.st i{width:14px;height:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-size:10px;font-weight:700}
+.st.ok i{background:var(--ok)}.st.warn i{background:var(--warn2)}
+td.dim{color:var(--g2)}
+.rowact{display:inline-flex;gap:8px;justify-content:flex-end}
+.dialog.wide{width:528px}
+.dialog .sub{margin:-12px 0 0;font-size:14px;line-height:20px;color:var(--g1)}
+.stephead{display:flex;flex-direction:column;gap:12px}
+.stephead small{font-size:14px;line-height:16px;color:var(--g1)}
+.stephead .row{display:flex;justify-content:space-between;align-items:baseline}
+.stephead h2{margin:0;font-size:20px;line-height:24px;letter-spacing:-.4px;font-weight:600}
+.stephead .row span{font-size:12px;color:var(--g1)}
+.bar{height:4px;border-radius:2px;background:var(--g3)}.bar i{display:block;height:100%;border-radius:2px;background:var(--blue3)}
+.mtabs{display:flex;gap:8px;box-shadow:inset 0 -1px 0 var(--g3)}
+.mtabs button{padding:0 8px 10px;border:0;background:transparent;font-size:14px;line-height:16px;color:var(--g1);cursor:pointer}
+.mtabs button:hover{color:var(--blue3)}
+.mtabs button[aria-selected="true"]{color:var(--blue1);font-weight:500;box-shadow:inset 0 -2px 0 var(--blue1)}
+.tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.tools .search input{width:246px}
+.sw{display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;user-select:none}
+.sw input{position:absolute;opacity:0;width:1px;height:1px}
+.sw .tr{width:32px;height:18px;border-radius:9px;background:var(--g3);position:relative;flex:none;transition:background .15s}
+.sw .tr::after{content:"";position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(20,22,26,.2);transition:left .15s}
+.sw input:checked + .tr{background:var(--blue1)}.sw input:checked + .tr::after{left:16px}
+.sw input:focus-visible + .tr{outline:2px solid var(--blue1);outline-offset:1px}
+.mt{min-width:0;font-size:14px}
+.mt th:last-child{text-align:left}
+.mt td{height:48px}
+.mt td:first-child{font-weight:400}
+.mt td:last-child{text-align:left}
+.mt tr.added td{color:var(--g2)}
+.mt input[type=checkbox],.ack input{width:18px;height:18px;margin:0;accent-color:var(--blue1);cursor:pointer;vertical-align:middle}
+.mt input[type=checkbox]:disabled{cursor:not-allowed}
+.collapse{padding:0;border:0;background:transparent;color:var(--blue1);font-size:16px;line-height:20px;font-weight:500;display:inline-flex;align-items:center;gap:6px;cursor:pointer;align-self:flex-start}
+.cardsel{height:40px;padding:0 12px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;gap:10px;font-size:14px}
+.cardsel .tag{margin-left:auto;padding:2px 8px;border-radius:6px;background:var(--g4);font-size:12px;font-weight:500}
+.cardsel .exp{font-size:12px;color:var(--g1)}
+.sum{padding:16px;border-radius:12px;background:var(--g4);display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:20px}
+.sum .r{display:flex;justify-content:space-between}
+.sum hr{margin:0;border:0;border-top:1px solid var(--g3)}
+.toggles{display:flex;flex-direction:column;gap:16px}
+.tog{padding:12px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;gap:16px;justify-content:space-between;align-items:flex-start}
+.tog b{display:block;font-size:14px;line-height:20px;font-weight:600;margin-bottom:4px}
+.tog span{font-size:12px;line-height:16px;color:var(--g1)}
+.box{padding:16px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:20px}
+.box b{font-weight:600}
+.box ul{margin:0;padding:0 0 0 20px;display:flex;flex-direction:column;gap:8px}
+.box li::marker{color:var(--blue1)}
+.ack{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:20px;cursor:pointer}
+.ack input{margin-top:1px;flex:none}
+/* Paid-plan release warning (new for CWR-4577) */
+.alert.warn{background:var(--warn4);color:var(--warn3)}
+.alert.warn i{background:var(--warn1)}
+.alert b{font-weight:600}
+.alert p{margin:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{padding:12px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:var(--black)}
+.opt:hover{box-shadow:inset 0 0 0 1px var(--blue1);background:var(--blue5);color:var(--black)}
+.opt .oi{width:32px;height:32px;flex:none;border-radius:10px;background:var(--blue5);color:var(--blue1);display:inline-flex;align-items:center;justify-content:center}
+.opt:hover .oi{background:#fff}
+.opt b{display:block;font-size:14px;line-height:20px;font-weight:600;color:var(--black)}
+.opt span{font-size:13px;line-height:18px;color:var(--g1)}
+.opt .go{margin-left:auto;align-self:center;color:var(--blue1)}
+.lbl{font-size:12px;line-height:16px;font-weight:500;color:var(--g1);text-transform:uppercase;letter-spacing:.4px}
+.checks{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:20px}
+.checks li{display:flex;gap:10px;align-items:flex-start}
+.checks svg{flex:none;margin-top:2px}
+/* /new-organization onboarding */
+.onb{min-height:100vh;background:var(--grad1);padding:32px 16px 64px;position:relative}
+.onb .brand{display:flex;justify-content:center;align-items:center;gap:8px;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-.6px;color:#14163C}
+.onb .tr-act{position:absolute;top:30px;right:28px;display:flex;gap:16px}
+.onb .tr-act .btn{height:32px;padding:0 12px}
+.onb .tr-act .sq{width:32px;padding:0}
+.ocard{width:480px;max-width:100%;margin:80px auto 0;padding:32px;border-radius:20px;background:#fff;display:flex;flex-direction:column;gap:32px}
+.ocard h1{font-size:28px;line-height:32px;letter-spacing:-.56px}
+.ocard .lead{margin:8px 0 0;font-size:14px;line-height:20px;color:var(--g1)}
+.ocard .bar{margin-top:24px}
+.req{color:var(--err)}
+.sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.size{height:32px;padding:0 12px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.size:hover{box-shadow:inset 0 0 0 1px var(--g2)}
+/* Generic radio: 16px, --g2 ring; checked = --blue1 ring with a white centre */
+.field .size input{appearance:none;-webkit-appearance:none;flex:none;width:16px;height:16px;padding:0;margin:0;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px var(--g2);cursor:pointer;transition:box-shadow .12s}
+.field .size input:checked{box-shadow:inset 0 0 0 5px var(--blue1)}
+.size input:focus-visible{outline:2px solid var(--blue1);outline-offset:2px}
+.ocard .btn.primary{width:100%;height:44px}
+.ocard .fine{margin:-16px 0 0;text-align:center;font-size:12px;line-height:16px;color:var(--g1)}
+
+@media (max-width:800px){
+  .onb .tr-act{position:static;justify-content:flex-end;margin-bottom:16px}
+  .ocard{margin-top:32px;padding:24px}
+  .sizes{grid-template-columns:repeat(2,1fr)}
+  .side{position:static;height:auto;width:100%;box-shadow:inset 0 -1px 0 var(--g3)}
+  .side .bottom{display:none}
+  .main{padding:24px 16px 96px}
+  h1{font-size:28px;line-height:32px;letter-spacing:-.56px}
+  .search input,.tools .search input{width:100%}
+  .proto span{display:none}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function () {
+  'use strict';
+
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+  const money = (n) => '$' + n.toFixed(2);
+
+  const IC = {
+    check: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" style="flex:none"><circle cx="8" cy="8" r="7" fill="#05944F"/><path d="M4.8 8.2l2.1 2.1 4.3-4.4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    chevR: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M6 4l4 4-4 4"/></svg>',
+    chevU: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10l4-4 4 4"/></svg>',
+    chevDn: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>',
+    dots: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>',
+    plus: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>',
+    x: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    pencil: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3-8 8H2.5v-3z"/></svg>',
+    unlink: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 9.5l-2 2a2.1 2.1 0 0 1-3-3l2-2M9.5 6.5l2-2a2.1 2.1 0 0 1 3 3l-2 2M2.5 2.5l11 11"/></svg>',
+    search: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#757D8A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>',
+    info: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 7.5v4M8 4.6v.1"/></svg>',
+    bang: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 4.5v4.5M8 11.4v.1"/></svg>',
+    eye: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M1.5 9S4 4 9 4s7.5 5 7.5 5-2.5 5-7.5 5S1.5 9 1.5 9z"/><circle cx="9" cy="9" r="2.2"/></svg>',
+    refresh: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3"/></svg>',
+    support: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 9V8a5.5 5.5 0 0 1 11 0v1M2.5 9h2v4h-2zM11.5 9h2v4h-2zM13.5 13c0 1-1 1.5-3 1.5"/></svg>',
+    org: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 14h12M3.5 14V3h6v11M9.5 6.5h3V14M5.5 5.5h2M5.5 8h2M5.5 10.5h2"/></svg>',
+    off: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#FFF8E9" stroke="#BA7D04"/><path d="M5.5 8h5" stroke="#BA7D04" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    keep: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#E7F6ED" stroke="#05944F"/><path d="M5 8.2l2 2 4-4.2" fill="none" stroke="#05944F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    gone: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#FFF1F0" stroke="#E11900"/><path d="M5.8 5.8l4.4 4.4M10.2 5.8l-4.4 4.4" stroke="#E11900" stroke-width="1.6" stroke-linecap="round"/></svg>'
+  };
+  const TW = '<svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#F22F46" stroke-width="3"/><circle cx="12.3" cy="12.3" r="2.6" fill="#F22F46"/><circle cx="19.7" cy="12.3" r="2.6" fill="#F22F46"/><circle cx="12.3" cy="19.7" r="2.6" fill="#F22F46"/><circle cx="19.7" cy="19.7" r="2.6" fill="#F22F46"/></svg>';
+  const TWs = TW.replace('width="34" height="34"', 'width="20" height="20"');
+
+  const CARDS = [
+    { name: 'Twilio', kind: 'twilio' },
+    { name: 'ActiveCampaign', initials: 'AC', color: '#356AE6', native: true, kind: 'connect', meta: '6 automations · 24 zaps' },
+    { name: 'Keap', sub: '(Infusionsoft)', initials: 'K', color: '#2B8A3E', native: true, kind: 'connect', meta: '6 automations · 18 zaps' },
+    { name: 'HubSpot', initials: 'HS', color: '#C2410C', native: true, kind: 'connect', meta: '4 automations · 23 zaps' },
+    { name: 'GoHighLevel', initials: 'HL', color: '#14161A', native: true, kind: 'connect' },
+    { name: 'Zapier', initials: 'Z', color: '#C2410C', native: true, kind: 'connect' },
+    { name: 'Webhook', initials: 'W', color: '#1364F9', native: true, kind: 'add' },
+    { name: 'ClickBank', initials: 'CB', color: '#14161A', native: true, kind: 'connect' },
+    { name: 'Shopify', initials: 'S', color: '#4D7C2F', native: true, kind: 'connect' },
+    { name: 'AWeber', initials: 'AW', color: '#1D5FD1', kind: 'explore', meta: '2 automations · 7 zaps' },
+    { name: 'Drip', initials: 'D', color: '#B0179F', kind: 'explore' },
+    { name: 'Mailchimp', initials: 'M', color: '#14161A', kind: 'explore', meta: '10 zaps' }
+  ];
+  const NAV = [
+    ['Account', 'M9 8.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 15.5c.6-3.2 3-5 6-5s5.4 1.8 6 5'],
+    ['Company', 'M2.5 15.5h13M4 15.5V3.5h6v12M10 7.5h4v8M6 6h2M6 9h2M6 12h2'],
+    ['Compliance', 'M9 2l6 2.5v4c0 3.5-2.6 6.3-6 7.5-3.4-1.2-6-4-6-7.5v-4zM6.5 9l1.8 1.8L11.5 7.5'],
+    ['Billing & Usage', 'M2.5 4.5h13v9h-13zM2.5 7.5h13M5 11h3'],
+    ['Numbers', 'M5.5 2h7v14h-7zM8.25 13.5h1.5'],
+    ['Integrations', 'M7 2.5h4v3a2 2 0 1 1-4 0zM2.5 7h3a2 2 0 1 1 0 4h-3zM7 15.5v-3a2 2 0 1 1 4 0v3zM15.5 7h-3a2 2 0 1 0 0 4h3z'],
+    ['Audio', 'M9 2.5a2.5 2.5 0 0 0-2.5 2.5v4a2.5 2.5 0 0 0 5 0V5A2.5 2.5 0 0 0 9 2.5zM4 9a5 5 0 0 0 10 0M9 14v2']
+  ];
+
+  /* Call Loop numbers on a paid plan: these are what the warning is about. Caller IDs are the customer's own, so they stay. */
+  const CL_NUMBERS = [
+    { n: '(844) 976-1728', label: '', status: '', type: 'Toll Free' },
+    { n: '(833) 902-4179', label: 'Reminders', status: 'ok', type: 'Local' },
+    { n: '(907) 412-0532', label: 'Sales', status: '', type: 'Toll Free' },
+    { n: '(880) 481-0416', label: '', status: 'warn', type: 'Local' },
+    { n: '(205) 797-2382', label: 'Support', status: 'ok', type: 'Local' },
+    { n: '(844) 950-1204', label: '', status: '', type: 'Caller ID' }
+  ];
+  /* Numbers on the customer's Twilio account, as listed in step 1 of "Manage external number". */
+  const TWILIO_NUMBERS = ['(205) 548-1655', '(907) 412-0533', '(480) 032-0998', '(520) 662-5472', '(205) 555-0101', '(205) 555-0102', '(205) 555-0103', '(205) 555-0104', '(205) 555-0105', '(205) 555-0106'];
+  const PRICE = 5;
+
+  const fresh = (plan) => ({
+    plan, screen: 'integrations',
+    twilio: null,                    // { account, key }
+    numbers: plan === 'paid' ? CL_NUMBERS.map((x, i) => Object.assign({ id: 'c' + i }, x)) : [],
+    modal: null, form: { key: '', token: '', show: false },
+    ack: false, toggles: { phones: true, triggers: true, broadcasts: true },
+    tab: 'external', picked: [], hideAdded: false, q: '', listOpen: true,
+    menu: false, toast: '', seq: 1,
+    org: 'Organization name', onb: { name: '', size: '' }
+  });
+  let S = fresh('trial');
+  let toastTimer = null, focusAfter = null, lastFocusBtn = null;
+
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    S.toast = msg;
+    toastTimer = setTimeout(() => { S.toast = ''; render(); }, 3600);
+  }
+  const released = () => S.numbers.filter((x) => x.type === 'Toll Free' || x.type === 'Local');
+  const externals = () => S.numbers.filter((x) => x.type === 'External');
+
+  /* ---------- views ---------- */
+  function sidebar() {
+    const ic = (d) => '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"/></svg>';
+    const target = { Numbers: 'numbers', Integrations: 'integrations' };
+    const trial = S.plan === 'trial';
+    return '<nav class="side" aria-label="Settings"><div style="display:flex;flex-direction:column;gap:4px">' +
+      '<div class="shead">Settings<button type="button" class="sclose" data-act="demo" aria-label="Close settings"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>' +
+      '<div class="divider"></div>' +
+      NAV.map(([label, d]) => {
+        const on = target[label] === S.screen;
+        return '<a href="#" class="nav' + (on ? ' on' : '') + '" data-act="' + (target[label] ? 'go' : 'demo') + '" data-v="' + (target[label] || '') + '"' + (on ? ' aria-current="page"' : '') + '>' + ic(d) + esc(label) + '</a>';
+      }).join('') +
+      '<div class="divider"></div><a href="#" class="nav" data-act="demo">' + ic('M7 2.5H3.5v13H7M11.5 5.5L15 9l-3.5 3.5M15 9H7') + 'Log Out</a></div>' +
+      '<div class="bottom" style="display:flex;flex-direction:column;gap:4px">' +
+      '<a href="#" class="nav" data-act="demo">' + ic('M3 7v4h2l5 3V4L5 7zM13 6.5a3 3 0 0 1 0 5M5.5 11l1 4') + 'Product Updates</a>' +
+      '<a href="#" class="nav" data-act="demo">' + ic('M9 16a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM9 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM4 4l2.9 2.9M11.1 11.1L14 14M14 4l-2.9 2.9M6.9 11.1L4 14') + 'Help &amp; Support</a>' +
+      '<div class="plan"><div class="row" style="font-size:13px;line-height:16px"><strong>' + (trial ? 'Free Trial' : 'Pro Monthly 25K') + '</strong><a href="#" data-act="demo" style="font-size:12px">Upgrade</a></div>' +
+      '<div class="prog" role="progressbar" aria-label="Credits used" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100"><i></i></div>' +
+      '<div class="row"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="#14161A"/><path d="M7 3.8l.9 1.9 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L4.1 6l2-.3z" fill="#fff"/></svg>' + (trial ? '25/25 credits' : '19,875 credits') + '</span><a href="#" data-act="demo">' + (trial ? 'Recharge' : 'Buy') + '</a></div></div>' +
+      '</div></nav>';
+  }
+
+  function integrationsView() {
+    const html = CARDS.map((c) => {
+      const tw = c.kind === 'twilio';
+      let act;
+      if (tw && S.twilio) {
+        act = '<div class="pill ok">' + IC.check + '<span>' + esc(S.twilio.account) + '</span></div>';
+      } else if (tw || c.kind === 'connect') {
+        act = '<button type="button" class="btn primary grow" data-act="' + (tw ? 'startConnect' : 'demo') + '">Connect</button><button type="button" class="btn secondary" data-act="demo">Docs</button>';
+      } else if (c.kind === 'add') {
+        act = '<button type="button" class="btn primary grow" data-act="demo">Add contacts</button><button type="button" class="btn secondary" data-act="demo">Docs</button>';
+      } else {
+        act = '<button type="button" class="explore" data-act="demo">Explore' + IC.chevR + '</button>';
+      }
+      const menu = tw && S.twilio;
+      return '<div class="card"><div class="ctop"><span class="native">Native</span>' +
+        (menu ? '<button type="button" class="more" data-act="toggleMenu" aria-label="More actions for Twilio" aria-haspopup="menu" aria-expanded="' + S.menu + '">' + IC.dots + '</button>' : '') +
+        '</div><div class="logo' + (tw ? ' tw' : '') + '" aria-hidden="true"' + (tw ? '' : ' style="color:' + c.color + '"') + '>' + (tw ? TW : c.initials) + '</div>' +
+        '<span class="cname">' + esc(c.name) + (c.sub ? ' <span class="muted">' + esc(c.sub) + '</span>' : '') +
+        (c.meta ? '<br><span class="muted" style="font-size:12px">' + esc(c.meta) + '</span>' : '') + '</span>' +
+        '<div class="cact">' + act + '</div>' +
+        (menu && S.menu ? '<div class="menu" role="menu" aria-label="Twilio actions"><button type="button" class="mi" role="menuitem" data-act="openEdit">Edit</button><button type="button" class="mi" role="menuitem" data-act="demo">Docs</button><button type="button" class="mi" role="menuitem" data-act="openDisconnect" style="color:var(--err)">Disconnect</button></div>' : '') +
+        '</div>';
+    }).join('');
+    return '<div class="topbar"><h1>Integrations</h1></div><div class="grid">' + html + '</div>';
+  }
+
+  function statusCell(s) {
+    if (s === 'ok') return '<span class="st ok"><i>✓</i>Verified</span>';
+    if (s === 'warn') return '<span class="st warn"><i>!</i>Unverified</span>';
+    return '<span class="muted">–</span>';
+  }
+
+  function numbersView() {
+    const rows = S.numbers.map((x) =>
+      '<tr><td>' + esc(x.n) + '</td><td>' + (x.label ? esc(x.label) : '<span class="muted">–</span>') + '</td><td>' + statusCell(x.status) + '</td>' +
+      '<td>' + (x.type === 'External' ? '<span class="chip ext">External</span>' : esc(x.type)) + '</td><td class="dim">Disabled</td>' +
+      '<td><span class="rowact"><button type="button" class="ibtn" data-act="demo" aria-label="Edit ' + esc(x.n) + '" title="Edit">' + IC.pencil + '</button>' +
+      (x.type === 'External' ? '<button type="button" class="ibtn danger" data-act="openDropNumber" data-id="' + x.id + '" aria-label="Disconnect ' + esc(x.n) + '" title="Disconnect number">' + IC.unlink + '</button>' : '') +
+      '</span></td></tr>').join('');
+    return '<h1>Numbers</h1>' +
+      '<div class="topbar"><div style="display:flex;gap:12px;flex-wrap:wrap"><button type="button" class="btn primary" data-act="openBuy">' + IC.plus + 'Buy number</button><button type="button" class="btn secondary" data-act="demo">' + IC.plus + 'Add caller ID</button></div>' +
+      '<div class="search">' + IC.search + '<input type="search" aria-label="Search numbers" placeholder="Search..."></div></div>' +
+      (S.numbers.length ? '<div class="tbl"><table><thead><tr><th scope="col">Number</th><th scope="col">Label</th><th scope="col">Status</th><th scope="col">Type</th><th scope="col">Call forwarding</th><th scope="col"><span class="sr" style="position:absolute;left:-9999px">Actions</span></th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+        : '<div class="empty"><b>No numbers yet</b><span>' + (S.twilio ? 'Add numbers from your Twilio account with Buy number → Manage external number.' : 'Buy a number, or connect your Twilio account in Integrations to use your own numbers.') + '</span></div>');
+  }
+
+  function newOrgView() {
+    const o = S.onb;
+    const ok = o.name.trim() && o.size;
+    const sizes = ['Just me', '2-5', '6-20', '21-50', '51-200', '200+'];
+    return '<div class="onb">' +
+      '<div class="tr-act"><button type="button" class="btn secondary" data-act="demo"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5.5h10l-2.5-2.5M13.5 10.5h-10l2.5 2.5"/></svg>Switch organization</button>' +
+      '<button type="button" class="btn secondary sq" data-act="onbClose" aria-label="Close and go back">' + IC.x.replace(/22/g, '16') + '</button></div>' +
+      '<div class="brand"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M22 7.5A10 10 0 1 0 22 20.5" fill="none" stroke="#1364F9" stroke-width="5" stroke-linecap="round"/></svg>Call Loop</div>' +
+      '<form class="ocard" onsubmit="return false"><div><h1>Tell us about your company</h1><p class="lead">This will help customize the app for you</p><div class="bar"><i style="width:50%"></i></div></div>' +
+      '<div class="field"><label for="o-name">Company name <span class="req">*</span></label><input id="o-name" data-input="onbName" placeholder="e.g. Grower" autocomplete="organization" value="' + esc(o.name) + '"></div>' +
+      '<fieldset class="field" style="border:0;margin:0;padding:0"><legend style="font-size:12px;line-height:16px;font-weight:500;color:var(--g1);margin-bottom:8px;padding:0">How many people work at your company?</legend><div class="sizes">' +
+      sizes.map((s) => '<label class="size' + (o.size === s ? ' on' : '') + '"><input type="radio" name="size" value="' + esc(s) + '" data-act="onbSize"' + (o.size === s ? ' checked' : '') + '>' + esc(s) + '</label>').join('') +
+      '</div></fieldset>' +
+      '<button type="button" class="btn primary" data-act="onbDone"' + (ok ? '' : ' disabled') + '>Continue</button>' +
+      '<p class="fine">After your 14-day trial is over, you will be upgraded to the Pro Monthly 1000 $49/month. Cancel anytime.</p></form></div>';
+  }
+
+  /* ---------- modals ---------- */
+  const overlay = (inner) => '<div class="overlay" data-act="closeModal">' + inner + '</div>';
+  const closeBtn = '<button type="button" class="x" data-act="closeModal" aria-label="Close">' + IC.x + '</button>';
+
+  function warnModal() {
+    return overlay('<div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="w-t" aria-describedby="w-d">' +
+      '<div class="dhead"><span class="mlogo tw" aria-hidden="true">' + TWs + '</span><h2 id="w-t">Before you connect Twilio</h2>' + closeBtn + '</div>' +
+      '<div class="alert warn" id="w-d"><i>' + IC.bang + '</i><div><p><b>Your current Call Loop numbers will be released.</b> When you connect an external Twilio account, your toll-free and local numbers are released from Call Loop.</p></div></div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px"><span class="lbl">What happens</span><ul class="checks">' +
+      '<li>' + IC.gone + '<span>Toll-free and local numbers are released and can’t be used to send messages.</span></li>' +
+      '<li>' + IC.off + '<span>Triggers, keywords and campaigns that use these numbers are disabled.</span></li>' +
+      '<li>' + IC.keep + '<span>Your messaging history stays untouched.</span></li></ul></div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px"><span class="lbl">Need to keep these numbers?</span><div class="opts">' +
+      '<a class="opt" href="#" data-act="support"><span class="oi">' + IC.support + '</span><span><b>Port them out</b><span>Contact support and we’ll help you move the numbers before you connect.</span></span><span class="go">' + IC.chevR + '</span></a>' +
+      '<a class="opt" href="/new-organization" data-act="newOrg"><span class="oi">' + IC.org + '</span><span><b>Create a new account</b><span>Connect Twilio in a separate Call Loop account and keep this one as it is.</span></span><span class="go">' + IC.chevR + '</span></a>' +
+      '</div></div>' +
+      '<label class="ack"><input type="checkbox" data-act="ack" ' + (S.ack ? 'checked' : '') + ' data-autofocus><span>I understand my toll-free and local numbers will be released</span></label>' +
+      '<div class="dact" style="margin-top:0"><button type="button" class="btn primary" data-act="toCreds"' + (S.ack ? '' : ' disabled') + '>Continue</button><button type="button" class="btn secondary" data-act="closeModal">Cancel</button></div></div>');
+  }
+
+  function credsModal(isEdit) {
+    const f = S.form;
+    const ok = f.key.trim() && f.token.trim();
+    return overlay('<div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="c-t">' +
+      '<div class="dhead"><span class="mlogo tw" aria-hidden="true">' + TWs + '</span><h2 id="c-t">' + (isEdit ? 'Edit Twilio connection' : 'Connect Twilio') + '</h2>' + closeBtn + '</div>' +
+      (isEdit ? '' : '<div class="alert info"><i>' + IC.info + '</i><span>Enter your Twilio API key and token to connect your account to Call Loop.</span></div>') +
+      '<div class="fields">' +
+      '<div class="field"><label for="f-key">API Key</label><input id="f-key" data-input="key" placeholder="Enter API Key" autocomplete="off" value="' + esc(f.key) + '"></div>' +
+      '<div class="field"><label for="f-token">API Token</label><div style="position:relative"><input id="f-token" style="width:100%;padding-right:40px" type="' + (f.show ? 'text' : 'password') + '" data-input="token" placeholder="Enter API Token" autocomplete="new-password" value="' + esc(f.token) + '">' +
+      '<button type="button" class="x" data-act="eye" aria-label="' + (f.show ? 'Hide' : 'Show') + ' token" style="position:absolute;right:8px;top:8px">' + IC.eye + '</button></div></div>' +
+      '</div><div class="dact"><button type="button" class="btn primary" data-act="applyCreds"' + (ok ? '' : ' disabled') + '>Apply</button><button type="button" class="btn secondary" data-act="closeModal">Cancel</button></div></div>');
+  }
+
+  function disconnectModal() {
+    const t = S.toggles;
+    const row = (k, title, body) => '<div class="tog"><div><b>' + title + '</b><span>' + body + '</span></div><label class="sw"><input type="checkbox" data-act="tog" data-k="' + k + '"' + (t[k] ? ' checked' : '') + ' aria-label="' + title + '"><span class="tr"></span></label></div>';
+    const allOff = !t.phones && !t.triggers && !t.broadcasts;
+    return overlay('<div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="d-t">' +
+      '<div class="dhead"><h2 id="d-t">Disconnect Twilio</h2>' + closeBtn + '</div>' +
+      '<div class="alert info"><i>' + IC.info + '</i><span><b style="font-weight:600">Disconnect Twilio?</b><br>To disconnect Twilio, turn off the following features.</span></div>' +
+      '<div class="toggles">' +
+      row('phones', 'Phone numbers', 'Turning off disconnects all phone numbers connected to Twilio and makes them unavailable in Call Loop.') +
+      row('triggers', 'Triggers', 'Turning off changes Trigger statuses: Active → Disabled.') +
+      row('broadcasts', 'Broadcasts', 'Turning off changes Broadcast statuses: Scheduled → Draft, Sending → Paused. You won’t be able to create broadcasts with these numbers.') +
+      '</div><div class="dact" style="margin-top:0"><button type="button" class="btn primary" data-act="confirmDisconnect"' + (allOff ? '' : ' disabled') + '>Disconnect Twilio</button><button type="button" class="btn secondary" data-act="closeModal">Back</button></div></div>');
+  }
+
+  function buyModal() {
+    const step2 = S.modal.step === 2;
+    const head = '<div class="stephead"><div class="row"><small>Buy number</small>' + closeBtn + '</div><div class="row"><h2 id="b-t">' + (step2 ? 'Payment' : 'Choose number') + '</h2><span>Step ' + (step2 ? 2 : 1) + ' / 2</span></div><div class="bar"><i style="width:' + (step2 ? 100 : 50) + '%"></i></div></div>';
+    if (step2) {
+      const n = S.picked.length;
+      const total = n * PRICE, unused = +(total * 0.494).toFixed(2);
+      return overlay('<div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="b-t">' + head +
+        '<button type="button" class="collapse" data-act="listToggle" aria-expanded="' + S.listOpen + '">' + (S.listOpen ? IC.chevU : IC.chevDn) + 'Selected numbers: ' + n + '</button>' +
+        (S.listOpen ? '<table class="mt"><thead><tr><th>Phone number</th><th>Price</th></tr></thead><tbody>' + S.picked.map((p) => '<tr><td>' + esc(p) + '</td><td>' + money(PRICE) + '</td></tr>').join('') + '</tbody></table>' : '') +
+        '<div class="field"><label>Card</label><div class="cardsel"><svg width="24" height="16" viewBox="0 0 24 16" aria-hidden="true"><circle cx="9" cy="8" r="5" fill="#EB001B"/><circle cx="15" cy="8" r="5" fill="#F79E1B" fill-opacity=".85"/></svg>Mastercard •••• 4250<span class="tag">Primary</span><span class="exp">Exp 12 / 28</span></div></div>' +
+        '<div class="sum"><div class="r"><span>Monthly total <span class="muted" style="font-size:12px">' + n + ' × $' + PRICE + '</span></span><span>$' + total + '/month</span></div><hr>' +
+        '<div class="r"><span>Monthly total</span><span>' + money(total) + '</span></div><div class="r"><span>Unused time</span><span>−' + money(unused) + '</span></div><hr>' +
+        '<div class="r"><span>Total charged today</span><b>' + money(total - unused) + '</b></div></div>' +
+        '<div class="dact" style="margin-top:0"><button type="button" class="btn primary" data-act="buy">Buy number</button><button type="button" class="btn secondary" data-act="buyBack">Back</button></div></div>');
+    }
+    const tabs = '<div class="mtabs" role="tablist">' + [['local', 'Local number'], ['tf', 'Toll-Free number'], ['external', 'Manage external number']].map(([k, l]) =>
+      '<button type="button" role="tab" data-act="mtab" data-v="' + k + '" aria-selected="' + (S.tab === k) + '">' + l + '</button>').join('') + '</div>';
+    let body;
+    if (S.tab !== 'external') {
+      body = '<div class="alert info"><i>' + IC.info + '</i><span>' + (S.tab === 'local' ? 'You’re required by carriers to register for A2P 10DLC before sending messages from local numbers.' : 'You’re required by carriers to verify toll-free numbers before sending messages.') + '</span></div>' +
+        '<p class="muted" style="margin:0;font-size:14px">Buying Call Loop numbers isn’t part of this prototype — see the Buy number prototype.</p>';
+    } else if (!S.twilio) {
+      body = '<div class="empty"><span class="mlogo tw" aria-hidden="true" style="width:48px;height:48px;border-radius:16px">' + TW + '</span><b>Connect Twilio to use your own numbers</b><span>Once your Twilio account is connected, its numbers show up here and you can choose which ones to use in Call Loop.</span><button type="button" class="btn primary" data-act="goConnect" style="margin-top:8px">Go to Integrations</button></div>';
+    } else {
+      const added = new Set(externals().map((x) => x.n));
+      const q = S.q.replace(/\D/g, '');
+      const list = TWILIO_NUMBERS.filter((p) => (!S.hideAdded || !added.has(p)) && (!q || p.replace(/\D/g, '').includes(q)));
+      const free = TWILIO_NUMBERS.filter((p) => !added.has(p));
+      const allPicked = free.length && free.every((p) => S.picked.includes(p));
+      body = '<div class="alert info"><i>' + IC.info + '</i><span>Select the numbers you want to use in Call Loop.</span></div>' +
+        '<div class="tools"><div class="search">' + IC.search + '<input id="f-q" type="search" data-input="q" aria-label="Search numbers" placeholder="Search..." value="' + esc(S.q) + '"></div>' +
+        '<label class="sw"><input type="checkbox" data-act="hideAdded"' + (S.hideAdded ? ' checked' : '') + '><span class="tr"></span>Hide added numbers (' + added.size + ')</label></div>' +
+        '<table class="mt"><thead><tr><th style="width:40px"><input type="checkbox" data-act="pickAll" aria-label="Select all"' + (allPicked ? ' checked' : '') + (free.length ? '' : ' disabled') + '></th><th>Phone number</th><th>Purchased ↓</th></tr></thead><tbody>' +
+        list.map((p) => {
+          const a = added.has(p);
+          return '<tr class="' + (a ? 'added' : '') + '"' + (a ? ' title="Already added"' : '') + '><td><input type="checkbox" data-act="pick" data-v="' + esc(p) + '" aria-label="' + esc(p) + (a ? ' (already added)' : '') + '"' + (a || S.picked.includes(p) ? ' checked' : '') + (a ? ' disabled' : '') + '></td><td>' + esc(p) + '</td><td>Oct 14, 2026 · 9:00 AM</td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+    const canGo = S.tab === 'external' && S.twilio && S.picked.length;
+    return overlay('<div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="b-t">' + head + tabs + body +
+      (S.tab === 'external' && !S.twilio ? '' : '<div class="dact" style="margin-top:0"><button type="button" class="btn primary" data-act="buyNext"' + (canGo ? '' : ' disabled') + '>Continue' + (S.picked.length ? ' (' + S.picked.length + ')' : '') + '</button><button type="button" class="btn secondary" data-act="demo">' + IC.refresh + 'Refresh</button></div>') +
+      '</div>');
+  }
+
+  function dropNumberModal() {
+    const x = S.numbers.find((r) => r.id === S.modal.id);
+    return overlay('<div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="n-t">' +
+      '<div class="dhead"><h2 id="n-t">Disconnect number</h2>' + closeBtn + '</div>' +
+      '<div class="alert info"><i>' + IC.info + '</i><span>Are you sure you want to disconnect ' + esc(x ? x.n : '') + '? The number will be disconnected from Call Loop but stays on your Twilio account.</span></div>' +
+      '<div class="box"><b>Disconnecting affects everything that uses this number:</b><ul><li>Scheduled broadcasts</li><li>Campaigns</li><li>Triggers</li><li>Keywords</li><li>Web Forms</li></ul></div>' +
+      '<label class="ack"><input type="checkbox" data-act="ack"' + (S.ack ? ' checked' : '') + ' data-autofocus><span>I understand this action is destructive and can’t be undone</span></label>' +
+      '<div class="dact" style="margin-top:0"><button type="button" class="btn primary" data-act="dropNumber"' + (S.ack ? '' : ' disabled') + '>Disconnect number</button><button type="button" class="btn secondary" data-act="closeModal">Cancel</button></div></div>');
+  }
+
+  function modalView() {
+    const m = S.modal;
+    if (!m) return '';
+    if (m.type === 'warn') return warnModal();
+    if (m.type === 'connect') return credsModal(false);
+    if (m.type === 'edit') return credsModal(true);
+    if (m.type === 'disconnect') return disconnectModal();
+    if (m.type === 'buy') return buyModal();
+    if (m.type === 'drop') return dropNumberModal();
+    return '';
+  }
+
+  /* ---------- render ---------- */
+  const root = document.getElementById('root');
+  function render() {
+    const active = document.activeElement;
+    const keep = active && active.id && active.tagName === 'INPUT' ? { id: active.id, pos: active.selectionStart } : null;
+    root.innerHTML = (S.screen === 'neworg' ? newOrgView() : '<div class="app">' + sidebar() + '<main class="main"><div class="wrap">' + (S.screen === 'numbers' ? numbersView() : integrationsView()) + '</div></main></div>') +
+      modalView() +
+      '<div aria-live="polite">' + (S.toast ? '<div class="toast">' + IC.check + esc(S.toast) + '</div>' : '') + '</div>' +
+      (S.screen === 'neworg' ? '' : '<div class="proto" role="group" aria-label="Prototype: plan"><span>Plan:</span>' +
+      [['trial', 'Trial'], ['paid', 'Paid']].map(([k, l]) => '<button type="button" data-act="plan" data-v="' + k + '" aria-pressed="' + (S.plan === k) + '">' + l + '</button>').join('') + '</div>');
+    document.title = ({ numbers: 'Numbers', neworg: 'New organization' }[S.screen] || 'Integrations') + ' · Call Loop prototype';
+    const target = focusAfter ? document.getElementById(focusAfter) : (keep ? document.getElementById(keep.id) : null);
+    if (target) {
+      target.focus();
+      if (keep && target.id === keep.id && target.setSelectionRange && target.type !== 'password' && keep.pos != null) {
+        try { target.setSelectionRange(keep.pos, keep.pos); } catch (e) {}
+      }
+    } else if (S.modal) {
+      const ov = root.querySelector('.overlay');
+      if (!ov.contains(active)) { const af = ov.querySelector('[data-autofocus]') || ov.querySelector('button'); if (af) af.focus(); }
+    }
+    focusAfter = null;
+  }
+
+  function openModal(m) {
+    if (!S.modal) lastFocusBtn = document.activeElement;
+    S.modal = m; S.ack = false; S.menu = false;
+  }
+  function closeModal() {
+    S.modal = null;
+    if (lastFocusBtn && document.body.contains(lastFocusBtn)) setTimeout(() => lastFocusBtn && lastFocusBtn.focus(), 0);
+  }
+  function openCreds(type) {
+    openModal({ type });
+    S.form = type === 'edit' ? { key: S.twilio.key, token: '123456789abcd', show: false } : { key: '', token: '', show: false };
+    focusAfter = 'f-key';
+  }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    const hadMenu = S.menu;
+    if (S.menu && !(t && ['toggleMenu', 'openEdit', 'openDisconnect'].includes(t.dataset.act))) S.menu = false;
+    // Re-render only when needed: a label click is followed by a click on its input, which a re-render would detach.
+    if (!t) { if (hadMenu) render(); return; }
+    const act = t.dataset.act;
+    if (t.tagName === 'A') e.preventDefault();
+    if (act === 'closeModal' && t.classList.contains('overlay') && e.target !== t) return;
+    switch (act) {
+      case 'demo': showToast('Not part of this prototype'); break;
+      case 'go': S.screen = t.dataset.v; window.scrollTo(0, 0); break;
+      case 'plan': S = fresh(t.dataset.v); showToast(t.dataset.v === 'paid' ? 'Paid plan: 2 toll-free and 3 local numbers' : 'Trial: no Call Loop numbers yet'); break;
+      case 'toggleMenu': S.menu = !S.menu; break;
+      /* Trial goes straight to credentials; a paid plan sees the release warning first. */
+      case 'startConnect': if (S.plan === 'paid') openModal({ type: 'warn' }); else openCreds('connect'); break;
+      case 'ack': S.ack = t.checked; break;
+      case 'toCreds': if (S.ack) openCreds('connect'); break;
+      case 'support': showToast('Would open a support request to port numbers out'); break;
+      case 'newOrg': S.modal = null; S.prev = S.screen; S.screen = 'neworg'; S.onb = { name: '', size: '' }; focusAfter = 'o-name'; window.scrollTo(0, 0); break;
+      case 'onbClose': S.screen = S.prev || 'integrations'; break;
+      case 'onbSize': S.onb = Object.assign({}, S.onb, { size: t.value }); break;
+      /* A new organization starts on a trial, so it connects Twilio without the release warning. */
+      case 'onbDone': {
+        const name = S.onb.name.trim();
+        if (!name || !S.onb.size) break;
+        S = fresh('trial');
+        S.org = name;
+        showToast(name + ' created. Connect Twilio here — no numbers to release.');
+        break;
+      }
+      case 'eye': S.form = Object.assign({}, S.form, { show: !S.form.show }); break;
+      case 'applyCreds': {
+        if (!S.form.key.trim() || !S.form.token.trim()) break;
+        if (S.modal.type === 'edit') { S.twilio.key = S.form.key.trim(); closeModal(); showToast('Twilio connection updated'); break; }
+        const rel = released().length;
+        S.twilio = { account: 'callloop', key: S.form.key.trim() };
+        S.numbers = S.numbers.filter((x) => x.type !== 'Toll Free' && x.type !== 'Local');
+        closeModal();
+        showToast(rel ? 'Twilio connected. ' + plural(rel, 'Call Loop number') + ' released.' : 'Twilio connected');
+        break;
+      }
+      case 'openEdit': openCreds('edit'); break;
+      case 'openDisconnect': openModal({ type: 'disconnect' }); S.toggles = { phones: true, triggers: true, broadcasts: true }; break;
+      case 'tog': S.toggles = Object.assign({}, S.toggles, { [t.dataset.k]: t.checked }); break;
+      case 'confirmDisconnect': S.twilio = null; S.numbers = S.numbers.filter((x) => x.type !== 'External'); closeModal(); showToast('Twilio disconnected'); break;
+      case 'openBuy': openModal({ type: 'buy', step: 1 }); S.tab = S.twilio ? 'external' : 'local'; S.picked = []; S.q = ''; S.hideAdded = false; S.listOpen = true; break;
+      case 'mtab': S.tab = t.dataset.v; break;
+      case 'goConnect': closeModal(); S.screen = 'integrations'; break;
+      case 'hideAdded': S.hideAdded = t.checked; break;
+      case 'pick': { const v = t.dataset.v; S.picked = t.checked ? S.picked.concat(v) : S.picked.filter((p) => p !== v); break; }
+      case 'pickAll': { const added = new Set(externals().map((x) => x.n)); S.picked = t.checked ? TWILIO_NUMBERS.filter((p) => !added.has(p)) : []; break; }
+      case 'buyNext': if (S.picked.length) S.modal = { type: 'buy', step: 2 }; break;
+      case 'buyBack': S.modal = { type: 'buy', step: 1 }; break;
+      case 'listToggle': S.listOpen = !S.listOpen; break;
+      case 'buy': {
+        const n = S.picked.length;
+        S.numbers = S.picked.map((p) => ({ id: 'e' + S.seq++, n: p, label: '', status: 'warn', type: 'External' })).concat(S.numbers);
+        S.picked = [];
+        closeModal();
+        showToast(plural(n, 'number') + ' added from Twilio');
+        break;
+      }
+      case 'openDropNumber': openModal({ type: 'drop', id: t.dataset.id }); break;
+      case 'dropNumber': {
+        const x = S.numbers.find((r) => r.id === S.modal.id);
+        S.numbers = S.numbers.filter((r) => r.id !== S.modal.id);
+        closeModal();
+        showToast((x ? x.n : 'Number') + ' disconnected');
+        break;
+      }
+      case 'closeModal': closeModal(); break;
+    }
+    render();
+  });
+
+  document.addEventListener('input', (e) => {
+    const k = e.target.dataset && e.target.dataset.input;
+    if (!k) return;
+    if (k === 'q') S.q = e.target.value;
+    else if (k === 'onbName') S.onb = Object.assign({}, S.onb, { name: e.target.value });
+    else S.form = Object.assign({}, S.form, { [k]: e.target.value });
+    render();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (S.modal) { closeModal(); render(); }
+    else if (S.menu) { S.menu = false; render(); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
