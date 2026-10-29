@@ -4,7 +4,7 @@
 
 Clickable rework of the Figma design "16 Integrations – Twilio Integration" (Jira [CWR-4577](https://callloop.atlassian.net/browse/CWR-4577)). It differs from the first version in three ways:
 
-1. **One flow.** Connecting Twilio and choosing numbers happen in the same dialog, the [03 · Buy number](buy-number.md) dialog. Integrations → Connect opens it on the Twilio source: Step 1 connects the account, Step 2 chooses numbers, Step 3 is payment. Numbers → Buy number reaches the same steps when the customer picks Twilio before connecting.
+1. **One flow.** Connecting Twilio leads straight into choosing numbers. Integrations → Connect opens the **Connect Twilio** modal (unchanged from the Figma design). Apply connects the account and opens the [03 · Buy number](buy-number.md) dialog on Twilio → "In your account". In the Buy number dialog, a not-yet-connected Twilio shows a **Connect** button that opens the same modal on top of the dialog. Once connected, the Twilio card becomes a normal source card and is selected.
 2. **No plan difference.** Trial and paid accounts connect the same way. There is no release warning and no "create a new account" detour. Call Loop numbers keep working next to Twilio numbers.
 3. **Two sources, one UI.** The Buy number dialog has a source picker (Call Loop or Twilio). Both sources share the Local and Toll-Free tabs and the number finder. Twilio adds an "In your account" tab for numbers the customer already has there.
 
@@ -16,19 +16,20 @@ The source has one visual language everywhere it appears. The **Call Loop** mark
 
 | Place | What it shows |
 |---|---|
-| Source picker (step 1, top) | Two stacked full-width radio cards with the mark, the name and a second line saying where the number lives and who bills it. Call Loop: "$5.00/month per number, billed by Call Loop". Twilio: "Numbers in your Twilio account. Call Loop charges a $5.00/month fee". This line is the same on every tab and never shows a Twilio price. Selection uses the DS blue for both, so the marks carry identity and the blue carries state |
+| Source picker (step 1, top) | The Twilio card carries the same **New** badge after its name. Two stacked full-width radio cards with the mark, the name and a second line saying where the number lives and who bills it. Call Loop: "$5.00/month per number, billed by Call Loop". Twilio: "Numbers in your Twilio account. Call Loop charges a $5.00/month fee". This line is the same on every tab and never shows a Twilio price. Selection uses the DS blue for both, so the marks carry identity and the blue carries state |
 | Destination strip (Payment only) | The source mark and "Bought from **Call Loop**" / "Bought in your **Twilio** account **callloop**" / "Uses numbers in your **Twilio** account", with the monthly price and who bills it. On the Choose step the source cards carry this line instead, so the dialog fits without scrolling |
 | Payment | The same strip at the top, a Source column in the selected-numbers table, then the costs split into **Charged by Call Loop** (card, fee, proration) and **Charged by Twilio** (number rental billed to the Twilio account). Existing Twilio numbers show only the Call Loop part |
 | Primary button | "Buy number" (Call Loop), "Buy in Twilio" (new Twilio number), "Add N numbers" (existing Twilio numbers) |
 | Toast | "1 number bought from Call Loop" / "1 number bought in Twilio (callloop)" / "2 Twilio numbers added to Call Loop" |
-| Numbers page | Kept exactly as the live page (incl. CWR-4595). The only change is "(external)" after the type, in `--g1`, e.g. "Local (external)". Hovering or focusing it shows "From your Twilio account callloop". New rows are highlighted after a purchase |
+| Numbers page | Kept exactly as the live page (incl. CWR-4595). The only change is the integration's logo (16px) after the type, e.g. "Local" + Twilio logo. Hovering or focusing it shows "From your Twilio account callloop"; screen readers hear "Twilio number". When more integrations arrive, each shows its own logo, so the column names the exact provider instead of a generic word. New rows are highlighted after a purchase |
 
 ## Screens and states
 
 | Screen / state | How to reach it | Notes |
 |---|---|---|
-| Integrations list | Default | Twilio card first. Not connected: Connect. Connected: a `callloop` pill, "N numbers in Call Loop", and a ⋯ menu (Add Twilio numbers, Edit credentials, Docs, Disconnect) |
-| Buy number · Connect Twilio (step 1/3) | Integrations → Connect, or Buy number → Twilio source while not connected | The source picker stays visible, so the customer can switch back to Call Loop (the step count drops to 2). Fields are API Key and API Token (show/hide) plus "Where do I find these?". "Connect & continue" stays disabled until both are filled. The kicker reads "Twilio integration" when opened from Integrations |
+| Integrations list | Default | Twilio card first, with a **New** badge in the top-right corner, styled like the live app's (same as Native: `--purple3` / `--purple1`). When connected it sits left of the ⋯ menu. Not connected: Connect. Connected: a `callloop` pill, "N numbers in Call Loop", and a ⋯ menu (Add Twilio numbers, Edit credentials, Docs, Disconnect) |
+| Connect Twilio modal | Integrations → Connect, or the Connect button on the Twilio card in Buy number | The Figma credentials modal: Twilio logo, "Connect Twilio", info alert, API Key and API Token (show/hide), Apply (disabled until both are filled) / Cancel. From Buy number it opens on top of the dialog and returns to it with Twilio connected and selected. From Integrations, Apply opens Buy number on Twilio → "In your account" (kicker "Twilio integration"). The Buy number dialog always has 2 steps |
+| Buy number · Twilio not connected | Numbers → Buy number before connecting | The Twilio row has no radio: logo, "Twilio", "Connect your account to use or buy numbers in it" and a **Connect** button. Call Loop stays selected |
 | Choose number · Call Loop | Buy number (default source) | Same as 03 · Buy number: Local / Toll-Free tabs, 10DLC and toll-free alerts, Country, City / Area code, digit filter, radio list |
 | Choose number · Twilio · In your account | Default Twilio tab after connecting | No alert (the Twilio card says the numbers stay in Twilio). Multi-select table (Phone number, Type, Bought in Twilio). Numbers already in Call Loop are dimmed with an "In Call Loop" tag. Search, "Hide added", Sync |
 | Choose number · Twilio · Local / Toll-Free | Tabs | Same finder and list as Call Loop, with a different inventory. The alerts tell the customer to register 10DLC or verify toll-free in their Twilio account |
@@ -43,8 +44,8 @@ The source has one visual language everywhere it appears. The **Call Loop** mark
 - The paid-plan release warning ("Before you connect Twilio") and its acknowledgement
 - The `/new-organization` screen that was reached from that warning
 - The Trial / Paid prototype switch
-- The separate "Connect Twilio" credentials dialog, now step 1 of the Buy number dialog
-- The "External" purple chip on Numbers, replaced by "(external)" after the type
+- The connect step inside the Buy number dialog (tried and dropped; connecting uses its own modal again)
+- The "External" purple chip on Numbers, replaced by the Twilio logo after the type
 
 ## Design-system components used
 
@@ -59,6 +60,7 @@ The source has one visual language everywhere it appears. The **Call Loop** mark
 | Radio card | **New:** source picker card (mark, title, sub, radio dot) | Buy number step 1 |
 | Destination strip | **New:** `--g4` row with source mark, title and billing line | Top of Payment |
 | Source chip | **New:** `srcchip.cl` / `srcchip.tw` | Payment table only |
+| New badge | As in the live app: `--purple3` background, `--purple1` text, 12px, radius 6px | Twilio integration card (top right), Twilio source card |
 | Switch, Checkbox | — | Hide added, number picker, disconnect toggles, acknowledgement |
 | Dropdown | Card ⋯ menu | Twilio card |
 
@@ -83,6 +85,5 @@ Text `--black`, `--g1`, `--g2`; surfaces `--g4`, `--blue5`; borders `--g3`, `--g
 - **Default source.** Buy number opens on Call Loop. Should it open on Twilio once Twilio is connected?
 - **Mixed cart.** One purchase is one source. Should the customer be able to buy Call Loop and Twilio numbers in one checkout?
 - **Disconnecting one Twilio number.** The live Numbers page has no row actions. Where should "Disconnect number" live: the number's edit page, or a row ⋯ menu?
-- **Wording.** "(external)" is provider-neutral. Should it say "(Twilio)" instead, since Twilio is the only provider today?
 - **Disconnect copy.** Confirm that disconnecting Twilio leaves Call Loop numbers, and the triggers and broadcasts that use them, untouched.
 - Figma spells it "Twillio" in several places; the prototype uses "Twilio". Fix in Figma?

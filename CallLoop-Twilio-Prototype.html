@@ -76,6 +76,10 @@ input:focus,select:focus{box-shadow:inset 0 0 0 1px var(--blue1),0 0 0 3px var(-
 .card:hover{box-shadow:inset 0 0 0 1px var(--g2)}
 .ctop{align-self:stretch;height:28px;display:flex;justify-content:space-between;align-items:center}
 .native{padding:2px 8px;border-radius:6px;background:var(--purple3);color:var(--purple1);font-size:12px;line-height:16px}
+/* "New" badge for a newly launched integration: Integrations card and its source card in Buy number */
+.newb{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--purple3);color:var(--purple1);font-size:12px;line-height:16px;font-weight:400;vertical-align:1px}
+.src .newb{margin-left:6px}
+.ctop .rgt{display:flex;align-items:center;gap:8px}
 .more{width:28px;height:28px;padding:0;border:0;border-radius:8px;background:var(--g4);color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 .more:hover{background:var(--g3);color:var(--black)}
 .logo{width:72px;height:72px;border-radius:22px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;justify-content:center;font-size:20px;line-height:24px;font-weight:600;letter-spacing:-.4px}
@@ -113,8 +117,8 @@ td{height:56px;padding:0 8px;border-bottom:1px solid var(--g3);white-space:nowra
 .st i{width:14px;height:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-size:10px;font-weight:700}
 .st.ok i{background:var(--ok)}.st.warn i{background:var(--warn2)}
 .st.rev{color:var(--notify1)}.st.rev i{background:var(--notify1)}
-/* "(external)" after the type: the only Twilio-specific mark on the Numbers page */
-.ext{position:relative;color:var(--g1);cursor:help;outline:none}
+/* Integration logo after the type: the only Twilio-specific mark on the Numbers page. One logo per provider as more integrations arrive. */
+.ext{position:relative;display:inline-flex;vertical-align:-3px;margin-left:6px;cursor:help;outline:none}
 .ext .tip{display:none;position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);z-index:3;padding:6px 8px;border-radius:8px;background:rgba(20,22,26,.9);color:#fff;font-size:12px;line-height:16px;white-space:nowrap}
 .ext:hover .tip,.ext:focus .tip{display:block}
 .ext:focus-visible{outline:2px solid var(--blue1);outline-offset:2px;border-radius:4px}
@@ -196,6 +200,9 @@ td.dim{color:var(--g2)}
 .src{position:relative;padding:8px 12px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;gap:10px;cursor:pointer;min-width:0}
 .src:hover{box-shadow:inset 0 0 0 1px var(--g2)}
 .src input{position:absolute;opacity:0;width:1px;height:1px}
+.src.off{cursor:default}.src.off:hover{box-shadow:inset 0 0 0 1px var(--g3)}
+.src .btn.conn{height:32px;padding:0 12px;flex:none;margin-left:auto}
+.overlay.stack{z-index:52}
 .src.on{box-shadow:inset 0 0 0 2px var(--blue1);background:var(--blue5)}
 .src:has(input:focus-visible){outline:2px solid var(--blue1);outline-offset:2px}
 .src .sm{width:32px;height:32px;flex:none;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);display:inline-flex;align-items:center;justify-content:center}
@@ -425,7 +432,7 @@ td.dim{color:var(--g2)}
       bought: [], fresh: [],
       modal: null, form: { key: '', token: '', show: false },
       ack: false, toggles: { phones: true, triggers: true, broadcasts: true },
-      menu: false, toast: '', b: null
+      menu: false, toast: '', b: null, conn: null
     };
     s.numbers = CL_SEED.map((x) => Object.assign({ id: 'n' + s.seq++ }, x));
     if (connected) s.numbers = s.numbers.concat([
@@ -479,9 +486,9 @@ td.dim{color:var(--g2)}
         act = '<button type="button" class="explore" data-act="demo">Explore' + IC.chevR + '</button>';
       }
       const menu = tw && S.twilio;
-      return '<div class="card"><div class="ctop"><span class="native">Native</span>' +
+      return '<div class="card"><div class="ctop"><span class="native">Native</span><span class="rgt">' + (tw ? '<span class="newb">New</span>' : '') +
         (menu ? '<button type="button" class="more" data-act="toggleMenu" aria-label="More actions for Twilio" aria-haspopup="menu" aria-expanded="' + S.menu + '">' + IC.dots + '</button>' : '') +
-        '</div><div class="logo" aria-hidden="true"' + (tw ? '' : ' style="color:' + c.color + '"') + '>' + (tw ? twMark(34) : c.initials) + '</div>' +
+        '</span></div><div class="logo" aria-hidden="true"' + (tw ? '' : ' style="color:' + c.color + '"') + '>' + (tw ? twMark(34) : c.initials) + '</div>' +
         '<span class="cname">' + esc(c.name) + (c.sub ? ' <span class="muted">' + esc(c.sub) + '</span>' : '') +
         (tw && S.twilio ? '<br><span class="muted" style="font-size:12px">' + plural(S.numbers.filter((x) => x.src === 'tw').length, 'number') + ' in Call Loop</span>' : '') +
         (c.meta ? '<br><span class="muted" style="font-size:12px">' + esc(c.meta) + '</span>' : '') + '</span>' +
@@ -499,13 +506,13 @@ td.dim{color:var(--g2)}
     return '<span class="muted">–</span>';
   }
 
-  /* Matches the live Numbers page (incl. CWR-4595). The only addition for Twilio is "(external)" after the type. */
+  /* Matches the live Numbers page (incl. CWR-4595). The only addition for Twilio is its logo after the type. */
   function numbersView() {
     const rows = S.numbers.map((x) =>
       '<tr class="' + (S.fresh.includes(x.id) ? 'fresh' : '') + '"><td>' + esc(x.n) + '</td><td>' + (x.label ? esc(x.label) : '–') + '</td><td>' + statusCell(x.status) + '</td>' +
       '<td' + (x.fwd ? '' : ' class="dim"') + '>' + (x.fwd ? esc(x.fwd) + ' <span class="muted">· Ext</span>' : 'Disabled') + '</td>' +
       '<td' + (x.auto ? '' : ' class="dim"') + '>' + (x.auto ? 'Enabled' : 'Disabled') + '</td>' +
-      '<td>' + esc(x.type) + (x.src === 'tw' ? ' <span class="ext" tabindex="0">(external)<span class="tip" role="tooltip">From your Twilio account' + (S.twilio ? ' ' + esc(S.twilio.account) : '') + '</span></span>' : '') + '</td>' +
+      '<td>' + esc(x.type) + (x.src === 'tw' ? '<span class="ext" tabindex="0" role="img" aria-label="Twilio number">' + twMark(16) + '<span class="tip" role="tooltip">From your Twilio account' + (S.twilio ? ' ' + esc(S.twilio.account) : '') + '</span></span>' : '') + '</td>' +
       '<td>' + (x.loc ? esc(x.loc) : '–') + '</td><td></td></tr>').join('');
     return '<h1>Numbers</h1>' +
       '<div class="topbar"><div style="display:flex;gap:12px;flex-wrap:wrap"><button type="button" class="btn primary" data-act="openBuy">' + IC.plus + 'Buy number</button><button type="button" class="btn secondary" data-act="demo">' + IC.plus + 'Add caller ID</button><button type="button" class="btn secondary" data-act="demo">' + IC.plus + 'Get short code</button></div>' +
@@ -522,14 +529,6 @@ td.dim{color:var(--g2)}
   const alertBox = (title, body) => '<div class="alert"><i>' + IC.info + '</i><div class="tx"><b>' + title + '</b>' + (body ? '<p>' + body + '</p>' : '') + '</div></div>';
   const LEARN = ' <a href="#" data-act="learn">Learn more</a>';
 
-  function steps() {
-    const b = S.b;
-    const list = [];
-    if (b.src === 'tw' && (b.connectedHere || !S.twilio)) list.push('connect');
-    list.push('choose', 'pay');
-    return list;
-  }
-  function stage() { return S.b.src === 'tw' && !S.twilio ? 'connect' : S.b.step; }
   function tabsFor(src) {
     return src === 'tw'
       ? [['account', 'In your account'], ['local', 'Local'], ['tollfree', 'Toll-Free']]
@@ -571,21 +570,14 @@ td.dim{color:var(--g2)}
 
   function sourcePicker() {
     const b = S.b;
+    /* Not connected: the Twilio row can't be picked yet; its Connect button opens the Connect Twilio modal on top. */
+    const connectRow = '<div class="src off"><span class="sm">' + twMark(20) + '</span><span class="tx"><b>Twilio<span class="newb">New</span></b><small>' + twSub() + '</small></span>' +
+      '<button type="button" class="btn blue conn" data-act="openConnect" data-v="buy">Connect</button></div>';
     const opt = (src, sub) => '<label class="src' + (b.src === src ? ' on' : '') + '"><input type="radio" name="src" value="' + src + '" data-act="src" data-v="' + src + '"' + (b.src === src ? ' checked' : '') + '>' +
-      '<span class="sm">' + mark(src, 20) + '</span><span class="tx"><b>' + SRC_NAME[src] + '</b><small>' + sub + '</small></span><span class="rd" aria-hidden="true"></span></label>';
+      '<span class="sm">' + mark(src, 20) + '</span><span class="tx"><b>' + SRC_NAME[src] + (src === 'tw' ? '<span class="newb">New</span>' : '') + '</b><small>' + sub + '</small></span><span class="rd" aria-hidden="true"></span></label>';
     return '<fieldset class="srcs"><legend class="sr">Where the number comes from</legend>' +
       opt('cl', money(CL_PRICE) + '/month per number, billed by Call Loop') +
-      opt('tw', twSub()) + '</fieldset>';
-  }
-
-  function connectBody() {
-    const f = S.form;
-    return alertBox('Connect your Twilio account', 'Use numbers you already have in Twilio, or buy new ones there. Your Call Loop numbers keep working as they are.') +
-      '<div class="fields">' +
-      '<div class="field"><label for="f-key">API Key</label><input id="f-key" data-input="key" placeholder="Enter API Key" autocomplete="off" value="' + esc(f.key) + '"></div>' +
-      '<div class="field"><label for="f-token">API Token</label><div style="position:relative"><input id="f-token" style="width:100%;padding-right:40px" type="' + (f.show ? 'text' : 'password') + '" data-input="token" placeholder="Enter API Token" autocomplete="new-password" value="' + esc(f.token) + '">' +
-      '<button type="button" class="x" data-act="eye" aria-label="' + (f.show ? 'Hide' : 'Show') + ' token" style="position:absolute;right:8px;top:8px">' + IC.eye + '</button></div></div>' +
-      '<a href="#" data-act="learn" style="font-size:14px;font-weight:500;text-decoration:none">Where do I find these?</a></div>';
+      (S.twilio ? opt('tw', twSub()) : connectRow) + '</fieldset>';
   }
 
   function radioGrid(src, tab) {
@@ -679,17 +671,13 @@ td.dim{color:var(--g2)}
 
   function buyModal() {
     const b = S.b;
-    const st = stage();
-    const list = steps();
+    const st = b.step;
+    const list = ['choose', 'pay'];
     const idx = list.indexOf(st) + 1;
     const t = tabOf();
-    const titles = { connect: 'Connect Twilio', choose: 'Choose number', pay: 'Payment' };
+    const titles = { choose: 'Choose number', pay: 'Payment' };
     let body, actions;
-    if (st === 'connect') {
-      const ok = S.form.key.trim() && S.form.token.trim();
-      body = sourcePicker() + connectBody();
-      actions = '<button type="button" class="btn primary" data-act="connect"' + (ok ? '' : ' disabled') + '>Connect &amp; continue</button><button type="button" class="btn secondary" data-act="closeModal">Cancel</button>';
-    } else if (st === 'choose') {
+    if (st === 'choose') {
       const tabs = '<div class="tabs" role="tablist" aria-label="Number type">' + tabsFor(b.src).map(([k, l]) =>
         '<button type="button" class="tab" role="tab" data-act="btab" data-v="' + k + '" aria-selected="' + (t === k) + '">' + l + (k === 'account' ? '<span class="n">' + (S.twAccount.length - inCallLoop().size) + '</span>' : '') + '</button>').join('') + '</div>';
       body = sourcePicker() + tabs + (t === 'account' ? accountBody() : t === 'tollfree' ? tollFreeBody(b.src) : localBody(b.src));
@@ -709,15 +697,19 @@ td.dim{color:var(--g2)}
   }
 
   /* ---------- other modals ---------- */
-  function editModal() {
+  /* Connect / edit credentials. Connect opens on top of whatever is open (Integrations or the Buy number dialog). */
+  function credsModal(isEdit) {
     const f = S.form;
     const ok = f.key.trim() && f.token.trim();
-    return overlay('<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="c-t">' +
-      '<div class="dhead"><span class="mlogo" aria-hidden="true">' + twMark(20) + '</span><h2 id="c-t">Edit Twilio connection</h2>' + closeBtn + '</div>' +
-      '<div class="fields"><div class="field"><label for="f-key">API Key</label><input id="f-key" data-input="key" autocomplete="off" value="' + esc(f.key) + '"></div>' +
-      '<div class="field"><label for="f-token">API Token</label><div style="position:relative"><input id="f-token" style="width:100%;padding-right:40px" type="' + (f.show ? 'text' : 'password') + '" data-input="token" autocomplete="new-password" value="' + esc(f.token) + '">' +
+    const close = isEdit ? 'closeModal' : 'closeConn';
+    return '<div class="overlay stack" data-act="' + close + '"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="c-t">' +
+      '<div class="dhead"><span class="mlogo" aria-hidden="true">' + twMark(20) + '</span><h2 id="c-t">' + (isEdit ? 'Edit Twilio connection' : 'Connect Twilio') + '</h2>' +
+      '<button type="button" class="x" data-act="' + close + '" aria-label="Close">' + IC.x + '</button></div>' +
+      (isEdit ? '' : '<div class="alert"><i>' + IC.info + '</i><div class="tx"><p style="margin:0">Enter your Twilio API key and token to connect your account to Call Loop.</p></div></div>') +
+      '<div class="fields"><div class="field"><label for="f-key">API Key</label><input id="f-key" data-input="key" placeholder="Enter API Key" autocomplete="off" value="' + esc(f.key) + '"></div>' +
+      '<div class="field"><label for="f-token">API Token</label><div style="position:relative"><input id="f-token" style="width:100%;padding-right:40px" type="' + (f.show ? 'text' : 'password') + '" data-input="token" placeholder="Enter API Token" autocomplete="new-password" value="' + esc(f.token) + '">' +
       '<button type="button" class="x" data-act="eye" aria-label="' + (f.show ? 'Hide' : 'Show') + ' token" style="position:absolute;right:8px;top:8px">' + IC.eye + '</button></div></div></div>' +
-      '<div class="dact"><button type="button" class="btn primary" data-act="applyEdit"' + (ok ? '' : ' disabled') + '>Apply</button><button type="button" class="btn secondary" data-act="closeModal">Cancel</button></div></div>');
+      '<div class="dact"><button type="button" class="btn primary" data-act="' + (isEdit ? 'applyEdit' : 'connect') + '"' + (ok ? '' : ' disabled') + '>Apply</button><button type="button" class="btn secondary" data-act="' + close + '">Cancel</button></div></div></div>';
   }
 
   function disconnectModal() {
@@ -748,7 +740,7 @@ td.dim{color:var(--g2)}
     const m = S.modal;
     if (!m) return '';
     if (m.type === 'buy') return buyModal();
-    if (m.type === 'edit') return editModal();
+    if (m.type === 'edit') return credsModal(true);
     if (m.type === 'disconnect') return disconnectModal();
     if (m.type === 'drop') return dropNumberModal();
     return '';
@@ -763,7 +755,7 @@ td.dim{color:var(--g2)}
     const bodyEl = root.querySelector('.dialog.buy .body');
     const bodyTop = bodyEl ? bodyEl.scrollTop : 0;
     root.innerHTML = '<div class="app">' + sidebar() + '<main class="main"><div class="wrap">' + (S.screen === 'numbers' ? numbersView() : integrationsView()) + '</div></main></div>' +
-      modalView() +
+      modalView() + (S.conn ? credsModal(false) : '') +
       '<div aria-live="polite">' + (S.toast ? '<div class="toast">' + IC.check + esc(S.toast) + '</div>' : '') + '</div>' +
       '<div class="proto" role="group" aria-label="Prototype: Twilio state"><span>Twilio:</span>' +
       [[false, 'Not connected'], [true, 'Connected']].map(([k, l]) => '<button type="button" data-act="seed" data-v="' + k + '" aria-pressed="' + (!!S.twilio === k) + '">' + l + '</button>').join('') + '</div>';
@@ -781,8 +773,8 @@ td.dim{color:var(--g2)}
       const sel = '[data-act="' + keepAct.act + '"]' + (keepAct.v ? '[data-v="' + keepAct.v + '"]' : '') + (keepAct.id ? '[data-id="' + keepAct.id + '"]' : '') + (keepAct.k ? '[data-k="' + keepAct.k + '"]' : '');
       const el = root.querySelector(sel);
       if (el) el.focus();
-    } else if (S.modal) {
-      const ov = root.querySelector('.overlay');
+    } else if (S.modal || S.conn) {
+      const ov = root.querySelector('.overlay.stack') || root.querySelector('.overlay');
       if (!ov.contains(active)) { const af = ov.querySelector('[data-autofocus]') || ov.querySelector('input,button'); if (af) af.focus(); }
     }
     focusAfter = null;
@@ -800,14 +792,18 @@ td.dim{color:var(--g2)}
   function openBuy(src, from) {
     openModal({ type: 'buy' });
     S.b = {
-      src: src || 'cl', from: from || 'numbers', step: 'choose', connectedHere: false, keepScroll: false,
-      tab: { cl: 'local', tw: S.twilio ? 'account' : 'account' },
+      src: src === 'tw' && S.twilio ? 'tw' : 'cl', from: from || 'numbers', step: 'choose', keepScroll: false,
+      tab: { cl: 'local', tw: 'account' },
       country: 'US', mode: 'city', place: '', digits: '', tfDigits: '', page: {}, pick: {},
       sel: [], q: '', hideAdded: false, listOpen: true, card: 'mc'
     };
-    S.form = { key: '', token: '', show: false };
     ensurePick();
-    if (stage() === 'connect') focusAfter = 'f-key';
+  }
+  function openConnect(from) {
+    if (!S.modal) lastFocusBtn = document.activeElement;
+    S.conn = { from }; S.menu = false;
+    S.form = { key: '', token: '', show: false };
+    focusAfter = 'f-key';
   }
 
   function resetScroll() { if (S.b) S.b.keepScroll = false; }
@@ -830,9 +826,11 @@ td.dim{color:var(--g2)}
       case 'seed': S = fresh(t.dataset.v === 'true'); showToast(S.twilio ? 'Twilio connected, 2 Twilio numbers in Call Loop' : 'Twilio not connected'); break;
       case 'toggleMenu': S.menu = !S.menu; break;
       /* Same flow on every plan: no release warning, Call Loop numbers stay. */
-      case 'startConnect': openBuy('tw', 'integrations'); break;
+      case 'startConnect': openConnect('integrations'); break;
+      case 'openConnect': openConnect(t.dataset.v); break;
+      case 'closeConn': if (!(t.classList.contains('overlay') && e.target !== t)) S.conn = null; break;
       case 'openBuy': openBuy(t.dataset.v, S.screen === 'integrations' ? 'integrations' : 'numbers'); break;
-      case 'src': if (b.src !== t.value) { b.src = t.value; resetScroll(); ensurePick(); if (stage() === 'connect') focusAfter = 'f-key'; } break;
+      case 'src': if (b.src !== t.value) { b.src = t.value; resetScroll(); ensurePick(); } break;
       case 'btab': b.tab[b.src] = t.dataset.v; resetScroll(); ensurePick(); break;
       case 'mode': if (b.mode !== t.dataset.v) { b.mode = t.dataset.v; b.place = ''; ensurePick(); } break;
       case 'radio': b.pick[pickKey()] = t.dataset.id; break;
@@ -840,7 +838,11 @@ td.dim{color:var(--g2)}
       case 'connect':
         if (!S.form.key.trim() || !S.form.token.trim()) break;
         S.twilio = { account: 'callloop', key: S.form.key.trim() };
-        b.connectedHere = true; b.tab.tw = 'account'; b.step = 'choose'; resetScroll();
+        /* From Buy number: back to the dialog, Twilio now connected and picked.
+           From Integrations: straight on to choosing numbers, so connecting and adding numbers stay one flow. */
+        if (S.conn.from === 'buy') { b.src = 'tw'; b.tab.tw = 'account'; resetScroll(); }
+        else openBuy('tw', 'integrations');
+        S.conn = null;
         showToast('Twilio connected. Choose numbers to use in Call Loop.');
         break;
       case 'hideAdded': b.hideAdded = t.checked; break;
@@ -925,7 +927,8 @@ td.dim{color:var(--g2)}
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (S.modal) { closeModal(); render(); }
+    if (S.conn) { S.conn = null; render(); }
+    else if (S.modal) { closeModal(); render(); }
     else if (S.menu) { S.menu = false; render(); }
   });
 
