@@ -68,7 +68,7 @@ const PROTOTYPES = [
   {num:'02', slug:'analytics',  name:'Analytics',             file:'CallLoop-Analytics-Prototype.html', desc:'Analytics and reporting screens, plus a Forecast tab for credits, volume and value.'},
   {num:'03', slug:'buy-number', name:'Buy number',            file:'CallLoop-BuyNumber-Prototype.html', desc:'Flow for searching for and buying a phone number.'},
   {num:'04', slug:'clickbank',  name:'ClickBank integration', file:'CallLoop-ClickBank-Prototype.html', desc:'Connecting and using the ClickBank integration.'},
-  {num:'05', slug:'twilio',     name:'Twilio integration',    file:'CallLoop-Twilio-Prototype.html',    desc:'Connecting your own Twilio account, with a release warning for paid plans.'}
+  {num:'05', slug:'twilio',     name:'Twilio integration',    file:'CallLoop-Twilio-Prototype.html',    desc:'Connect Twilio and pick numbers in one flow; buy Call Loop or Twilio numbers from one dialog.'}
 ];
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('list').innerHTML = PROTOTYPES.map(p => `

@@ -8,7 +8,7 @@ The local copy of the Call Loop design system, synced read-only from Figma, plus
 | 02 | [Analytics](prototypes/analytics.md) | Analytics / reporting prototype |
 | 03 | [Buy number](prototypes/buy-number.md) | Buy-a-phone-number flow |
 | 04 | [ClickBank integration](prototypes/clickbank.md) | Integrations page and the ClickBank connect flow |
-| 05 | [Twilio integration](prototypes/twilio.md) | Connect your own Twilio account, external numbers, trial vs paid connect flow |
+| 05 | [Twilio integration](prototypes/twilio.md) | Connect Twilio and choose numbers in one flow, Call Loop vs Twilio number sources |
 
 Files:
 

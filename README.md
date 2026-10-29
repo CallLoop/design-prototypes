@@ -11,7 +11,7 @@ Each prototype is a single self-contained HTML file — no build step, no depend
 | Analytics | [CallLoop-Analytics-Prototype.html](CallLoop-Analytics-Prototype.html) | [02 · Analytics](design-system/prototypes/analytics.md) | Analytics / reporting screens, plus a Forecast tab (credits, volume and value) |
 | Buy number | [CallLoop-BuyNumber-Prototype.html](CallLoop-BuyNumber-Prototype.html) | [03 · Buy number](design-system/prototypes/buy-number.md) | Flow for buying a phone number |
 | ClickBank integration | [CallLoop-ClickBank-Prototype.html](CallLoop-ClickBank-Prototype.html) | [04 · ClickBank](design-system/prototypes/clickbank.md) | Connecting and using the ClickBank integration |
-| Twilio integration | [CallLoop-Twilio-Prototype.html](CallLoop-Twilio-Prototype.html) | [05 · Twilio](design-system/prototypes/twilio.md) | Connecting your own Twilio account, external numbers, and the trial vs paid connect flow (CWR-4577) |
+| Twilio integration | [CallLoop-Twilio-Prototype.html](CallLoop-Twilio-Prototype.html) | [05 · Twilio](design-system/prototypes/twilio.md) | Connecting Twilio and choosing numbers in one flow, plus buying Call Loop or Twilio numbers from one dialog (CWR-4577) |
 
 ## Design system
 
