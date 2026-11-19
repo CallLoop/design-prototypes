@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twilio Messaging Service</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Call Loop design system — synced from Figma "00 Design System", 2026-10-19. Source of truth: design-system/tokens.css */
+  --blue1:#1364F9;--blue2:#1854EA;--blue3:#1885EA;--blue4:#1362AC;--blue5:#E7EFFE;--blue6:#D0E0FE;
+  --blue1-dis:rgba(19,100,249,.4);
+  --black:#14161A;--white:#FFFFFF;--g1:#757D8A;--g2:#B7BFC8;--g3:#E0E6EE;--g4:#F3F5F8;
+  --g2-light:rgba(183,191,200,.3);--text:#2C2D2E;
+  --purple1:#7A16F5;--purple3:#F0E4FF;
+  --ok:#05944F;--ok2:#026233;--ok3:#E7F6ED;--notify1:#2E9AE4;--notify2:#E6F7FF;
+  --warn1:#FFC043;--warn2:#BA7D04;--warn3:#855A04;--warn4:#FFF8E9;--err:#E11900;--err3:#FFF1F0;
+  --shadow1:0 0 2px rgba(83,102,137,.2),0 12px 16px rgba(83,102,137,.08),0 10px 40px rgba(83,102,137,.08);
+  --r:8px;--dlg-w:494px;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);color:var(--black);background:var(--g4);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:var(--blue1)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--blue1);outline-offset:1px}
+
+/* Prototype controls */
+.ctl{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;z-index:90;width:max-content;max-width:calc(100% - 24px);border-radius:12px;box-shadow:var(--shadow1);background:var(--black);color:#fff;padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;font-size:13px;line-height:16px}
+.ctl b{font-weight:600;margin-right:4px}
+.ctl .grp{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ctl .copt{height:26px;padding:0 10px;border:0;border-radius:6px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:12px}
+.ctl .copt[aria-pressed="true"]{background:var(--blue1)}
+.ctl .copt:hover{background:rgba(255,255,255,.22)}.ctl .copt[aria-pressed="true"]:hover{background:var(--blue2)}
+.ctl .sp{flex:1}
+
+/* Page behind the modal */
+.page{max-width:1080px;margin:0 auto;padding:40px 24px 120px;display:flex;flex-direction:column;gap:24px}
+.page h1{margin:0;font-size:32px;line-height:40px;letter-spacing:-.6px;font-weight:600}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.notes{background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1px var(--g3);padding:20px 24px;font-size:14px;line-height:20px}
+.notes h3{margin:0 0 8px;font-size:15px;line-height:20px;font-weight:600}
+.notes ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.notes code{font-size:12px;background:var(--g4);padding:1px 5px;border-radius:4px}
+
+.btn{height:40px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;font-size:14px;line-height:16px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--blue1);color:#fff}.btn.primary:hover{background:var(--blue2)}
+.btn.primary:disabled{background:var(--blue1-dis);cursor:not-allowed}
+.btn.secondary{background:var(--g2-light);color:var(--black)}.btn.secondary:hover{background:var(--g3)}
+.btn.ghost{height:32px;padding:0 10px;background:transparent;color:var(--blue1)}.btn.ghost:hover{background:var(--blue5)}
+
+/* Modal */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(20,22,26,.2);display:flex;justify-content:center;align-items:flex-start;padding:40px 16px 120px;overflow-y:auto}
+.dialog{width:var(--dlg-w);max-width:100%;padding:24px 26px 26px;background:#fff;border-radius:20px;box-shadow:var(--shadow1);display:flex;flex-direction:column;gap:20px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.top h2{margin:0;font-size:20px;line-height:24px;letter-spacing:-.4px;font-weight:600}
+.x{width:24px;height:24px;padding:0;border:0;background:transparent;color:var(--g1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.x:hover{color:var(--black)}
+.step{display:flex;flex-direction:column;gap:8px;margin-top:-12px}
+.step span{align-self:flex-end;font-size:12px;line-height:16px;color:var(--g1)}
+.bar{height:4px;border-radius:2px;background:var(--g3);overflow:hidden}.bar i{display:block;height:100%;background:var(--blue3);border-radius:2px;transition:width .25s}
+.prov{display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;color:var(--g1)}
+.prov b{color:var(--black);font-weight:600}
+.mark{width:28px;height:28px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--g3);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.p2{font-size:14px;line-height:20px;margin:0}
+.muted{color:var(--g1)}
+
+.alert{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:12px;background:var(--notify2);font-size:14px;line-height:20px}
+.alert i{flex:none;width:24px;height:24px;border-radius:50%;background:var(--blue3);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:13px}
+.alert .tx{padding-top:2px}
+.alert b{display:block;font-weight:500;color:var(--blue4)}
+.alert p{margin:2px 0 0}
+.alert.warn{background:var(--warn4)}.alert.warn i{background:var(--warn1);color:var(--warn3)}.alert.warn b{color:var(--warn3)}
+.alert .acts{display:flex;gap:4px;margin:8px 0 0 -10px}
+
+/* Provider cards */
+.srcs{display:flex;flex-direction:column;gap:8px}
+.src{padding:12px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;gap:12px;cursor:pointer;background:#fff;border:0;text-align:left;width:100%}
+.src[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--blue1);background:var(--blue5)}
+.src .t{flex:1;display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:20px}
+.src .t b{font-weight:600}.src .t span{font-size:12px;line-height:16px;color:var(--g1)}
+.radio{width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--g2);flex:none}
+.src[aria-checked="true"] .radio{box-shadow:inset 0 0 0 5px var(--blue1)}
+.newb{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--purple3);color:var(--purple1);font-size:12px;line-height:16px;font-weight:400;margin-left:6px}
+.conn{font-size:12px;line-height:16px;color:var(--ok2);background:var(--ok3);padding:2px 8px;border-radius:6px;white-space:nowrap}
+
+/* Tabs + number list */
+.tabs{display:flex;gap:8px;box-shadow:inset 0 -1px 0 var(--g3)}
+.tab{padding:0 8px 10px;border:0;background:transparent;font-size:14px;line-height:16px;color:var(--g1);cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--blue3)}
+.tab[aria-selected="true"]{color:var(--blue1);font-weight:500;box-shadow:inset 0 -2px 0 var(--blue1)}
+.filters{display:flex;gap:8px}
+.inp{height:40px;padding:8px 12px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);font-size:14px;outline:none;min-width:0;flex:1;display:flex;align-items:center;color:var(--black)}
+.inp.dim{color:var(--g1)}
+.nums{display:flex;flex-direction:column;border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);overflow:hidden}
+.num{display:flex;align-items:center;gap:12px;padding:0 14px;height:48px;border:0;border-bottom:1px solid var(--g3);background:#fff;cursor:pointer;text-align:left;font-size:14px}
+.num:last-child{border-bottom:0}
+.num:hover{background:var(--g4)}
+.num[aria-checked="true"]{background:var(--blue5)}
+.num .n{flex:1;font-weight:500}.num .c{color:var(--g1);font-size:12px}
+.chk{width:18px;height:18px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--g2);flex:none;display:inline-flex;align-items:center;justify-content:center;color:#fff}
+.num[aria-checked="true"] .chk{background:var(--blue1);box-shadow:none}
+.num.owned .ms{font-size:12px;color:var(--g1)}
+
+/* Available numbers — mirrors the app: NumbersContainer is 160px tall, rows 40px; Local = 1 column of 4, Toll-Free = 3 columns of 4 */
+.stack{display:flex;flex-direction:column}
+.stack .inp.top{border-radius:8px 8px 0 0}
+.stack .inp.bot{border-radius:0 0 8px 8px;margin-top:-1px}
+.avail{height:160px;display:grid;grid-auto-rows:40px;align-content:flex-start;overflow-y:auto;overflow-x:hidden}
+.avail.tf{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:4px}
+.avail.tf .anum{gap:6px;padding:0 2px;font-size:13px}
+.anum{display:flex;align-items:center;gap:10px;padding:0 4px;border:0;border-radius:8px;background:transparent;cursor:pointer;text-align:left;font-size:14px;line-height:20px;min-width:0}
+.anum:hover{background:var(--g4)}
+.anum .n{flex:1;white-space:nowrap}
+.anum .c{font-size:12px;line-height:16px;color:var(--g1);padding-right:4px}
+.rd{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--g2);flex:none}
+.anum[aria-checked="true"] .rd{box-shadow:inset 0 0 0 5px var(--blue1)}
+
+/* Messaging Service field — the new piece */
+.field{display:flex;flex-direction:column;gap:8px;position:relative}
+.lblrow{display:flex;align-items:center;gap:6px;font-size:12px;line-height:16px;color:var(--g1)}
+.lblrow .req{color:var(--err)}
+.info{position:relative;display:inline-flex;width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 1.2px var(--g1);color:var(--g1);font-size:10px;font-weight:700;align-items:center;justify-content:center;cursor:help;outline:none}
+.info .tip{display:none;position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);z-index:5;width:260px;padding:8px 10px;border-radius:8px;background:rgba(20,22,26,.92);color:#fff;font-size:12px;line-height:16px;font-weight:400}
+.info:hover .tip,.info:focus .tip{display:block}
+.sel{height:44px;padding:0 12px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--g3);display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left;width:100%}
+.sel:hover{box-shadow:inset 0 0 0 1px var(--g2)}
+.sel[aria-expanded="true"]{box-shadow:inset 0 0 0 1px var(--blue1),0 0 0 3px var(--blue6)}
+.sel.invalid{box-shadow:inset 0 0 0 1px var(--err)}
+.sel:disabled{cursor:not-allowed;background:var(--g4)}
+.sel .v{flex:1;min-width:0;display:flex;flex-direction:column;font-size:14px;line-height:18px}
+.sel .v b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sel .v small{font-size:11px;line-height:14px;color:var(--g1);font-family:ui-monospace,Consolas,monospace}
+.sel .ph{color:var(--g1)}
+.help{font-size:12px;line-height:16px;color:var(--g1)}
+.help.err{color:var(--err)}
+.help a{text-decoration:none;font-weight:500}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid var(--g3);border-top-color:var(--blue1);animation:sp .8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.pop{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:10;background:#fff;border-radius:10px;box-shadow:var(--shadow1);padding:6px;display:flex;flex-direction:column;gap:2px;max-height:260px}
+.pop.up{top:auto;bottom:calc(100% - 20px)}
+.pop .list{overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border:0;border-radius:6px;background:transparent;cursor:pointer;text-align:left;width:100%}
+.opt:hover,.opt.hl{background:var(--g4)}
+.opt[aria-selected="true"]{background:var(--blue5)}
+.opt .v{flex:1;min-width:0;display:flex;flex-direction:column;font-size:14px;line-height:18px}
+.opt .v small{font-size:11px;line-height:14px;color:var(--g1);font-family:ui-monospace,Consolas,monospace}
+.tag{font-size:11px;line-height:14px;padding:2px 6px;border-radius:5px;background:var(--g4);color:var(--g1);white-space:nowrap}
+.opt[aria-selected="true"] .tag{background:#fff}
+.pop .foot{border-top:1px solid var(--g3);margin-top:4px;padding:6px 4px 2px;display:flex;justify-content:space-between;align-items:center}
+.pop .foot a{font-size:12px;font-weight:500;text-decoration:none}
+.pop .search{flex:none;height:34px;margin:0 0 4px;padding:0 10px;border:0;border-radius:6px;box-shadow:inset 0 0 0 1px var(--g3);font-size:13px;outline:none}
+.pop .search:focus{box-shadow:inset 0 0 0 1px var(--blue1)}
+
+/* Payment */
+.sum{border-radius:12px;box-shadow:inset 0 0 0 1px var(--g3);padding:4px 16px;font-size:14px;line-height:20px}
+.sum .r{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--g3)}
+.sum .r:last-child{border-bottom:0}
+.sum .k{color:var(--g1)}
+.sum .val{text-align:right;display:flex;align-items:center;gap:8px}
+.sum .val small{display:block;font-size:11px;color:var(--g1);font-family:ui-monospace,Consolas,monospace}
+.sum .tot{font-weight:600}
+.card{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;box-shadow:inset 0 0 0 2px var(--blue1);background:var(--blue5);font-size:14px}
+.card .brand{width:36px;height:24px;border-radius:4px;background:#1A1F71;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.dact{display:flex;gap:12px}
+.ok-ic{width:48px;height:48px;border-radius:50%;background:var(--ok3);color:var(--ok);display:flex;align-items:center;justify-content:center}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;padding:10px 14px;border-radius:10px;background:rgba(20,22,26,.92);color:#fff;font-size:14px;line-height:20px;box-shadow:var(--shadow1)}
+@media (max-width:540px){.dialog{padding:20px 16px}.overlay{padding:60px 8px 8px}.filters{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="ctl" role="toolbar" aria-label="Prototype controls">
+  <div class="grp"><b>Twilio account has</b>
+    <button class="copt" data-scn="many">Several services</button>
+    <button class="copt" data-scn="one">One service</button>
+    <button class="copt" data-scn="none">No services</button>
+    <button class="copt" data-scn="error">Load error</button>
+  </div>
+  <div class="grp"><b>Number</b>
+    <button class="copt" data-free="0">Paid (has numbers)</button>
+    <button class="copt" data-free="1">First one, free</button>
+  </div>
+  
+  <button class="copt" id="restart">Restart flow</button>
+</div>
+
+<div class="page">
+  <div class="phead">
+    <h1>Numbers</h1>
+    <button class="btn primary" id="open">+ Add number</button>
+  </div>
+  <div class="notes">
+    <h3>Messaging Service selector · buy a number via the Twilio integration</h3>
+    <ul>
+      <li>New required field <b>Messaging Service</b> on <b>Choose number → Local / Toll-Free</b> when the provider is Twilio. It sits on this step because the first free number is confirmed here and skips Payment.</li>
+      <li>Options come from <code>getCustomerTwilioMessagingServices</code> (name + SID). The value goes to <code>buyPhoneNumber</code> / <code>reservePhoneNumber</code> as <code>messagingServiceSid</code>.</li>
+      <li>Nothing is pre-selected, even with one service: the user always picks the service. Continue / Confirm stays disabled until a number and a service are chosen.</li>
+      <li>The <b>In your account</b> tab has no selector: those numbers keep the service they already have in Twilio, shown in the list.</li>
+      <li>Payment shows the chosen service with a <b>Change</b> link back to the previous step.</li>
+      <li>Use the dark bar to switch between several services, one, none and a load error, and between a paid and a first free number.</li>
+    </ul>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script>
+(() => {
+  const twMark = (s) => '<svg width="' + s + '" height="' + s + '" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#F22F46" stroke-width="3"/><circle cx="12.3" cy="12.3" r="2.6" fill="#F22F46"/><circle cx="19.7" cy="12.3" r="2.6" fill="#F22F46"/><circle cx="12.3" cy="19.7" r="2.6" fill="#F22F46"/><circle cx="19.7" cy="19.7" r="2.6" fill="#F22F46"/></svg>';
+  const clMark = (s) => '<svg width="' + s + '" height="' + s + '" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="26" height="26" rx="8" fill="#1364F9"/><path d="M11 16a5 5 0 1 0 5-5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>';
+  const chev = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>';
+  const check = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m2.5 6 2.5 2.5 4.5-5"/></svg>';
+  const ext = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true" style="vertical-align:-1px"><path d="M7 2h3v3M10 2 5.5 6.5M9 7v2.5a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5v-6a.5.5 0 0 1 .5-.5H5"/></svg>';
+  const reload = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 2.5v3h-3"/></svg>';
+  const xIc ='<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg>';
+
+  const SERVICES = {
+    many: [
+      { sid: 'MG3f1c9a7e52b04d8e9a0f6c1d2b3a4e91', name: 'Broadcast – Marketing' },
+      { sid: 'MG7a2e44d0c9f14b1d8e3f5a6b7c8d9012', name: 'Customer support' },
+      { sid: 'MGb81d0f2a3c4e5f60718293a4b5c6d7e8', name: 'Appointment reminders' },
+      { sid: 'MG0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f', name: 'Low Volume Mixed A2P Messaging Service' },
+      { sid: 'MG5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b', name: 'Webinar follow-ups' },
+      { sid: 'MG1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d', name: 'Sole Proprietor A2P Messaging Service' }
+    ],
+    one: [{ sid: 'MG7a2e44d0c9f14b1d8e3f5a6b7c8d9012', name: 'Customer support' }],
+    none: [],
+    error: null
+  };
+  const NUMBERS = {
+    local: [['+1 (512) 555-0143', 'Austin, TX'], ['+1 (512) 555-0188', 'Austin, TX'], ['+1 (512) 555-0127', 'Austin, TX'], ['+1 (737) 555-0102', 'Austin, TX']],
+    // Same page sizes as the app: Local pageSize 4 (one column), Toll-Free pageSize 12 (3 × 4 grid)
+    tollfree: ['+1 (833) 555-0161', '+1 (844) 555-0119', '+1 (877) 555-0134', '+1 (855) 555-0172', '+1 (866) 555-0145', '+1 (888) 555-0103',
+      '+1 (833) 555-0198', '+1 (844) 555-0126', '+1 (877) 555-0157', '+1 (855) 555-0181', '+1 (866) 555-0114', '+1 (888) 555-0169'].map((n) => [n, '']),
+    account: [['+1 (415) 555-0110', 'Customer support'], ['+1 (628) 555-0175', 'Broadcast – Marketing'], ['+1 (888) 555-0190', 'Appointment reminders']]
+  };
+
+  const s = {
+    scn: 'many', free: false, open: true, step: 'provider', tab: 'local', num: null,
+    ms: undefined, dd: false, q: '', loading: false, touched: false, toast: ''
+  };
+  const services = () => SERVICES[s.scn];
+  const shortSid = (sid) => sid.slice(0, 6) + '…' + sid.slice(-4);
+  const svc = (sid) => (services() || []).find((x) => x.sid === sid);
+
+  // Nothing is pre-selected: the user always picks a service explicitly.
+  function loadServices() {
+    s.loading = true; s.ms = undefined; render();
+    setTimeout(() => { s.loading = false; s.ms = null; render(); }, 700);
+  }
+
+  const total = () => (s.free ? 2 : 3);
+  const stepNo = () => ({ provider: 1, choose: 2, pay: 3 }[s.step] || total());
+
+  function header(title) {
+    const n = stepNo();
+    return '<div class="top"><h2>' + title + '</h2><button class="x" data-a="close" aria-label="Close">' + xIc + '</button></div>' +
+      '<div class="step"><span>Step ' + n + ' of ' + total() + '</span><div class="bar"><i style="width:' + (n / total() * 100) + '%"></i></div></div>';
+  }
+
+  function provider() {
+    return header('Choose provider') +
+      '<p class="p2">Get number through Broadcast or connect Twilio account</p>' +
+      '<div class="srcs" role="radiogroup">' +
+      '<button class="src" role="radio" aria-checked="false" data-a="noop"><span class="mark">' + clMark(20) + '</span><span class="t"><b>Broadcast</b><span>$5.00/month per number · Billed by Broadcast</span></span><span class="radio"></span></button>' +
+      '<button class="src" role="radio" aria-checked="true"><span class="mark">' + twMark(20) + '</span><span class="t"><b>Twilio<span class="newb">New</span></b><span>Broadcast charges a $5.00/month fee per number</span></span><span class="conn">Connected</span><span class="radio"></span></button>' +
+      '</div>' +
+      '<div class="dact"><button class="btn primary" data-a="toChoose">Continue</button><button class="btn secondary" data-a="close">Cancel</button></div>';
+  }
+
+  function msField() {
+    const list = services();
+    const tip = '<span class="info" tabindex="0" aria-label="About Messaging Services">i<span class="tip">Twilio sends and receives this number’s messages through a Messaging Service. Broadcast adds the new number to the service you pick in your Twilio account.</span></span>';
+    let control, help;
+    if (s.loading) {
+      control = '<button class="sel" disabled><span class="spin"></span><span class="v"><span class="ph">Loading Messaging Services…</span></span></button>';
+      help = '';
+    } else if (list === null) {
+      control = '<button class="sel invalid" disabled><span class="v"><span class="ph">Couldn’t load</span></span>' + chev + '</button>';
+      help = '<span class="help err">We couldn’t load Messaging Services from your Twilio account. <a href="#" data-a="retry">Try again</a></span>';
+    } else if (!list.length) {
+      return '<div class="field"><div class="lblrow">Messaging Service <span class="req">*</span>' + tip + '</div>' +
+        '<div class="alert warn"><i>!</i><div class="tx"><b>No Messaging Services in your Twilio account</b><p>Create one in Twilio, then refresh this list to buy a number.</p>' +
+        '<div class="acts"><button class="btn ghost" data-a="retry">Refresh</button></div></div></div></div>';
+    } else {
+      const cur = svc(s.ms);
+      const invalid = s.touched && !cur;
+      control = '<button class="sel' + (invalid ? ' invalid' : '') + '" data-a="dd" aria-haspopup="listbox" aria-expanded="' + s.dd + '">' +
+        (cur ? '<span class="v"><b>' + cur.name + '</b><small>' + shortSid(cur.sid) + '</small></span>'
+             : '<span class="v"><span class="ph">Select a Messaging Service</span></span>') + chev + '</button>';
+      help = invalid ? '<span class="help err">Select a Messaging Service.</span>'
+        : '<span class="help">The number is added to this service in your Twilio account.</span>';
+      if (s.dd) control += popup(list);
+    }
+    return '<div class="field"><div class="lblrow">Messaging Service <span class="req">*</span>' + tip + '</div>' + control + help + '</div>';
+  }
+
+  function popup(list) {
+    const q = s.q.trim().toLowerCase();
+    const shown = list.filter((x) => !q || x.name.toLowerCase().includes(q) || x.sid.toLowerCase().includes(q));
+    return '<div class="pop up" role="listbox" aria-label="Messaging Services">' +
+      (list.length > 5 ? '<input class="search" id="mssearch" placeholder="Search by name or SID" value="' + s.q.replace(/"/g, '&quot;') + '">' : '') +
+      '<div class="list">' + (shown.length ? shown.map((x) =>
+        '<button class="opt" role="option" aria-selected="' + (x.sid === s.ms) + '" data-a="pick" data-sid="' + x.sid + '"><span class="v">' + x.name + '<small>' + x.sid + '</small></span>' +
+        (x.sid === s.ms ? '<span style="color:var(--blue1)">' + check + '</span>' : '') + '</button>').join('')
+        : '<div class="help" style="padding:10px">No services match “' + s.q + '”</div>') + '</div>' +
+      '<div class="foot"><span></span><button class="btn ghost" data-a="retry">Refresh</button></div></div>';
+  }
+
+  function choose() {
+    const tabs = [['account', 'In your account'], ['local', 'Local number'], ['tollfree', 'Toll-Free number']];
+    let body = '';
+    if (s.tab === 'account') {
+      body = '<div class="alert"><i>i</i><div class="tx"><b>Select the numbers you want to use in Broadcast</b><p>These numbers stay in their current Messaging Service.</p></div></div>' +
+        '<div class="nums">' + NUMBERS.account.map(([n, ms]) => '<button class="num owned" role="checkbox" aria-checked="' + (s.num === n) + '" data-a="num" data-n="' + n + '"><span class="chk">' + check + '</span><span class="n">' + n + '</span><span class="ms">' + ms + '</span></button>').join('') + '</div>';
+    } else {
+      const loc = s.tab === 'local';
+      const alert = loc
+        ? '<div class="alert"><i>i</i><div class="tx"><b>You are required by the carriers to register for A2P 10DLC</b><p>To avoid messages from being blocked and paying additional carrier penalty fees, after adding the number, please complete the 10DLC registration. A2P 10DLC is required if you want to send messages to United States using local numbers. <a href="#" data-a="noop">Learn more</a></p></div></div>'
+        : '<div class="alert"><i>i</i><div class="tx"><b>You are required by the carriers to verify your toll-free numbers</b><p>To avoid carrier filtering and ensure better deliverability, after adding the number, please complete the toll-free verification. <a href="#" data-a="noop">Learn more</a></p></div></div>';
+      const filters = loc
+        ? '<div class="field"><div class="lblrow">Country</div><span class="inp">United States</span></div>' +
+          '<div class="stack"><span class="inp top">512 · Austin, TX</span><span class="inp bot dim">Filter by digits</span></div>'
+        : '<span class="inp dim">Filter by digits</span>';
+      body = alert + filters +
+        '<div class="avail' + (loc ? '' : ' tf') + '" role="radiogroup" aria-label="Available numbers">' + NUMBERS[s.tab].map(([n, c]) =>
+          '<button class="anum" role="radio" aria-checked="' + (s.num === n) + '" data-a="num" data-n="' + n + '"><span class="rd"></span><span class="n">' + n + '</span>' + (c ? '<span class="c">' + c + '</span>' : '') + '</button>').join('') + '</div>' +
+        msField();
+    }
+    const needMs = s.tab !== 'account';
+    const ready = !!s.num && (!needMs || (!!svc(s.ms) && !s.loading));
+    const primary = s.free ? 'Confirm' : 'Continue';
+    return header('Choose number') +
+      '<div class="prov">Selected provider: <span class="mark">' + twMark(18) + '</span><b>Twilio</b></div>' +
+      '<div class="tabs" role="tablist">' + tabs.map(([id, l]) => '<button class="tab" role="tab" aria-selected="' + (s.tab === id) + '" data-a="tab" data-t="' + id + '">' + l + '</button>').join('') + '</div>' +
+      body +
+      '<div class="dact"><button class="btn primary" data-a="next" ' + (ready ? '' : 'disabled') + '>' + primary + '</button><button class="btn secondary" data-a="back">Back</button>' +
+      (needMs ? '<span style="flex:1"></span><button class="btn secondary" data-a="noop">' + reload + ' Refresh</button>' : '') + '</div>';
+  }
+
+  function pay() {
+    const own = s.tab === 'account';
+    const cur = svc(s.ms);
+    return header('Payment') +
+      '<div class="alert"><i>i</i><div class="tx"><b>Purchased from Twilio</b><p>$5.00/month Broadcast fee per number, in addition to Twilio’s charges.</p></div></div>' +
+      '<div class="sum">' +
+      '<div class="r"><span class="k">Phone number</span><span class="val">' + s.num + '</span></div>' +
+      '<div class="r"><span class="k">Type</span><span class="val">' + (s.tab === 'tollfree' ? 'Toll-Free' : 'Local') + '</span></div>' +
+      '<div class="r"><span class="k">Messaging Service</span><span class="val">' +
+        (own ? '<span>' + NUMBERS.account.find((x) => x[0] === s.num)[1] + '<small>kept from Twilio</small></span>'
+             : '<span>' + cur.name + '<small>' + shortSid(cur.sid) + '</small></span><button class="btn ghost" data-a="back">Change</button>') + '</span></div>' +
+      '<div class="r"><span class="k">Due today</span><span class="val tot">$5.00</span></div>' +
+      '</div>' +
+      '<div class="card"><span class="brand">VISA</span><span style="flex:1">Visa ending 4242</span><span class="muted" style="font-size:12px">Default</span></div>' +
+      '<div class="dact"><button class="btn primary" data-a="buy">Buy number</button><button class="btn secondary" data-a="back">Back</button></div>';
+  }
+
+  function done() {
+    const own = s.tab === 'account';
+    const name = own ? NUMBERS.account.find((x) => x[0] === s.num)[1] : svc(s.ms).name;
+    return '<div class="top"><span></span><button class="x" data-a="close" aria-label="Close">' + xIc + '</button></div>' +
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;margin-top:-12px">' +
+      '<span class="ok-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 12 5 5 9-10"/></svg></span>' +
+      '<h2 style="margin:0;font-size:20px;line-height:24px;font-weight:600">Number added</h2>' +
+      '<p class="p2 muted"><b style="color:var(--black)">' + s.num + '</b> is ready to use. It’s in the <b style="color:var(--black)">' + name + '</b> Messaging Service in your Twilio account.</p></div>' +
+      '<div class="dact" style="justify-content:center"><button class="btn primary" data-a="close">Done</button></div>';
+  }
+
+  const root = document.getElementById('root');
+  function render() {
+    document.querySelectorAll('[data-scn]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.scn === s.scn));
+    document.querySelectorAll('[data-free]').forEach((b) => b.setAttribute('aria-pressed', (b.dataset.free === '1') === s.free));
+    if (!s.open) { root.innerHTML = s.toast ? '<div class="toast">' + s.toast + '</div>' : ''; return; }
+    const html = { provider, choose, pay, done }[s.step]();
+    root.innerHTML = '<div class="overlay" data-a="ovl"><div class="dialog" role="dialog" aria-modal="true">' + html + '</div></div>' + (s.toast ? '<div class="toast">' + s.toast + '</div>' : '');
+    const se = document.getElementById('mssearch');
+    if (se) { se.focus(); se.setSelectionRange(se.value.length, se.value.length); se.oninput = (e) => { s.q = e.target.value; render(); }; }
+  }
+
+  function flash(t) { s.toast = t; render(); setTimeout(() => { s.toast = ''; render(); }, 2600); }
+
+  function restart() {
+    Object.assign(s, { open: true, step: 'provider', tab: 'local', num: null, dd: false, q: '', touched: false, ms: undefined });
+    render();
+  }
+
+  document.addEventListener('click', (e) => {
+    const sc = e.target.closest('[data-scn]');
+    if (sc) { s.scn = sc.dataset.scn; s.dd = false; s.touched = false; if (s.step === 'pay' && s.tab !== 'account') s.step = 'choose'; loadServices(); return; }
+    const fr = e.target.closest('[data-free]');
+    if (fr) { s.free = fr.dataset.free === '1'; if (s.step === 'pay') s.step = 'choose'; render(); return; }
+    if (e.target.closest('#restart') || e.target.closest('#open')) { restart(); loadServices(); return; }
+    const el = e.target.closest('[data-a]');
+    if (!el) { if (s.dd) { s.dd = false; render(); } return; }
+    const a = el.dataset.a;
+    if (a === 'ovl' && e.target !== el) { if (s.dd && !e.target.closest('.field')) { s.dd = false; render(); } return; }
+    if (a !== 'dd' && a !== 'pick' && s.dd && !el.closest('.pop')) s.dd = false;
+    switch (a) {
+      case 'ovl': case 'close': s.open = false; render(); break;
+      case 'toChoose': s.step = 'choose'; render(); break;
+      case 'tab': s.tab = el.dataset.t; s.num = null; s.touched = false; render(); break;
+      case 'num': s.num = el.dataset.n; render(); break;
+      case 'dd': s.dd = !s.dd; s.q = ''; render(); break;
+      case 'pick': s.ms = el.dataset.sid; s.dd = false; render(); break;
+      case 'retry': e.preventDefault(); s.dd = false; loadServices(); break;
+      case 'back': s.step = s.step === 'pay' ? 'choose' : 'provider'; render(); break;
+      case 'next': {
+        if (s.tab !== 'account' && !svc(s.ms)) { s.touched = true; render(); break; }
+        if (s.free) { s.step = 'done'; render(); break; }
+        s.step = 'pay'; render(); break;
+      }
+      case 'buy': s.step = 'done'; render(); break;
+      default: render();
+    }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && s.dd) { s.dd = false; render(); } });
+
+  loadServices();
+})();
+</script>
+</body>
+</html>
