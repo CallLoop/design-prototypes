@@ -13,6 +13,7 @@ Each prototype is a single self-contained HTML file — no build step, no depend
 | ClickBank integration | [CallLoop-ClickBank-Prototype.html](CallLoop-ClickBank-Prototype.html) | [04 · ClickBank](design-system/prototypes/clickbank.md) | Connecting and using the ClickBank integration |
 | Twilio integration | [CallLoop-Twilio-Prototype.html](CallLoop-Twilio-Prototype.html) | [05 · Twilio](design-system/prototypes/twilio.md) | Connecting Twilio and choosing numbers in one flow, plus buying Call Loop or Twilio numbers from one dialog (CWR-4577) |
 | Twilio Messaging Service | [CallLoop-TwilioMessagingService-Prototype.html](CallLoop-TwilioMessagingService-Prototype.html) | [08 · Twilio Messaging Service](design-system/prototypes/twilio-messaging-service.md) | Required Messaging Service selector when buying a number through Twilio (CWR-4778) |
+| New pricing | [CallLoop-NewPricing-Prototype.html](CallLoop-NewPricing-Prototype.html) | [09 · New pricing](design-system/prototypes/new-pricing.md) | Keep-your-pricing announcement, Upgrade plan on the new plan lines, Buy credits packs per plan (CWR-4775). Built on the Broadcast Design System; React 18 loads from cdnjs |
 
 ## Design system
 

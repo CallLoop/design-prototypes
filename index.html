@@ -69,7 +69,8 @@ const PROTOTYPES = [
   {num:'03', slug:'buy-number', name:'Buy number',            file:'CallLoop-BuyNumber-Prototype.html', desc:'Flow for searching for and buying a phone number.'},
   {num:'04', slug:'clickbank',  name:'ClickBank integration', file:'CallLoop-ClickBank-Prototype.html', desc:'Connecting and using the ClickBank integration.'},
   {num:'05', slug:'twilio',     name:'Twilio integration',    file:'CallLoop-Twilio-Prototype.html',    desc:'Connect Twilio and pick numbers in one flow; buy Call Loop or Twilio numbers from one dialog.'},
-  {num:'08', slug:'twilio-messaging-service', name:'Twilio Messaging Service', file:'CallLoop-TwilioMessagingService-Prototype.html', desc:'Required Messaging Service selector when buying a number through the Twilio integration (CWR-4778).'}
+  {num:'08', slug:'twilio-messaging-service', name:'Twilio Messaging Service', file:'CallLoop-TwilioMessagingService-Prototype.html', desc:'Required Messaging Service selector when buying a number through the Twilio integration (CWR-4778).'},
+  {num:'09', slug:'new-pricing', name:'New pricing', file:'CallLoop-NewPricing-Prototype.html', desc:'Keep-your-pricing announcement with countdown, Upgrade plan on the new plan lines, Buy credits packs per plan (CWR-4775). Broadcast Design System.'}
 ];
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('list').innerHTML = PROTOTYPES.map(p => `

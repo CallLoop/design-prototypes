@@ -10,6 +10,7 @@ The local copy of the Call Loop design system, synced read-only from Figma, plus
 | 04 | [ClickBank integration](prototypes/clickbank.md) | Integrations page and the ClickBank connect flow |
 | 05 | [Twilio integration](prototypes/twilio.md) | Connect Twilio and choose numbers in one flow, Call Loop vs Twilio number sources |
 | 08 | [Twilio Messaging Service](prototypes/twilio-messaging-service.md) | Required Messaging Service selector when buying a number through Twilio (CWR-4778) |
+| 09 | [New pricing](prototypes/new-pricing.md) | Keep-your-pricing announcement, Upgrade plan on the new plan lines, Buy credits packs per plan (CWR-4775) |
 
 Files:
 
